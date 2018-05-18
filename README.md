@@ -1,11 +1,14 @@
 # intermine-nlp
 Natural language query parsing for Intermine
 
-FIXME: description
+Intermine is a database generation tool for genetic datasets. This library aims
+to provide a natural language front-end to Intermine, allowing users to
+interact with the database without needing to craft complex PathQuery queries.
 
+For more information, check out the [wiki](https://github.com/jmacneal/intermine-nlp/wiki) page.
 ## Installation
 
-Download from http://example.com/FIXME.
+Will be updated once code is on Clojars
 
 ## Usage
 
