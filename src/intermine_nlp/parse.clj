@@ -18,11 +18,11 @@
 ;;; in a secondary phase.
 
 
-(def get-sentences (nlp/make-sentence-detector "resources/models/en-sent.bin"))
-(def tokenize (nlp/make-tokenizer "resources/models/en-token.bin"))
-(def pos-tag (nlp/make-pos-tagger "resources/models/en-pos-maxent.bin"))
-(def chunker (treebank/make-treebank-chunker "resources/models/en-chunker.bin"))
-(def parser (treebank/make-treebank-parser "resources/models/en-parser-chunking.bin"))
+(def get-sentences (nlp/make-sentence-detector "resources/nlp_models/en-sent.bin"))
+(def tokenize (nlp/make-tokenizer "resources/nlp_models/en-token.bin"))
+(def pos-tag (nlp/make-pos-tagger "resources/nlp_models/en-pos-maxent.bin"))
+(def chunker (treebank/make-treebank-chunker "resources/nlp_models/en-chunker.bin"))
+(def parser (treebank/make-treebank-parser "resources/nlp_models/en-parser-chunking.bin"))
 
 (defn prepare-nlquery
   "Raw natural language queries must end in a period"
@@ -43,8 +43,8 @@
   (-> text prepare-nlquery vector parser first treebank/make-tree))
 
 ;; (defn parse-phrase
-;;   "Match against the "
-;;   [])
+;;   [text]
+;;   (let [tree]))
 
 ;; (defn text-to-ir
 ;;   "Match chunked text to internal representation (ir)"
