@@ -8,7 +8,7 @@
     (json/read-str json-string :key-fn keyword)))
 
 
-(defn parse-class-fields
+(defn parse-json
   "Parse an intermine db model (as a nested map).
   Returns a map of :class {:attributes {& attrs} :collections {& colls}}."
   [model]

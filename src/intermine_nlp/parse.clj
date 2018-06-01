@@ -29,22 +29,30 @@
   [text]
   (let [last-char (subs text (dec (count text)))]
     (if
-        (= last-char ".") text
+        (or
+         (= last-char ".")
+         (= last-char "?")
+         (= last-char "!")) text
         (str text "."))))
 
 (defn nlquery-to-chunk
   "Use NLP to convert raw text to chunked form"
   [text]
-  (-> text prepare-nlquery tokenize pos-tag chunker))
+  (-> text prepare-nlquery tokenize pos-tag chunker vec))
 
 (defn nlquery-to-tree
   "Use NLP to convert raw text to treebank tree form"
   [text]
   (-> text prepare-nlquery vector parser first treebank/make-tree))
 
-;; (defn parse-phrase
-;;   [text]
-;;   (let [tree]))
+
+(defn parse-phrase
+  [text]
+  (let [chunks (nlquery-to-chunk text)]
+    (match chunks
+           [{:tag "NP"} {:tag "VP"} {:tag "NP"} {:tag "NP"}] true
+           :else false
+           )))
 
 ;; (defn text-to-ir
 ;;   "Match chunked text to internal representation (ir)"

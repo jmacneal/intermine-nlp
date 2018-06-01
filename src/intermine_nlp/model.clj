@@ -46,9 +46,8 @@
          (catch Exception e (printf "Couldn't open local model '%s'." path)))))
 
 (defn store-model
-  "Store a model in the appropriate directory (resources/db_models)
-  Filename should end in .edn suffix."
-  [model filename]
-  (let [path (str "resources/db_models/" filename)]
+  "Store a model in the appropriate directory (resources/db_models)."
+  [model db-name]
+  (let [path (str "resources/db_models/" db-name "mine_model.edn")]
     (try (->> model prn-str (spit path))
          (catch Exception e (printf "Couldn't store model at '%s'." path)))))
