@@ -4,7 +4,8 @@
   :license {:name "Gnu Lesser General Public License Version 2.1"
             :url "https://www.gnu.org/licenses/old-licenses/lgpl-2.1.en.html"}
   :dependencies [[org.clojure/clojure "1.8.0"]
-                 [org.intermine/imcljs "0.5.1"]
+                 ;; [org.intermine/imcljs "0.5.1"]
+                 [org.intermine/imcljs "0.6.0-SNAPSHOT"]
                  [org.clojure/core.async "0.2.395"]
                  [org.clojure/core.match "0.3.0-alpha5"]
                  [clojure-opennlp "0.4.0"]
@@ -14,6 +15,7 @@
                  [instaparse "1.4.9"]
                  ;; [com.zensols.nlp/parse "0.1.4"]
                  ]
-  :main ^:skip-aot intermine-nlp.core
+  ;; :main ^:skip-aot intermine-nlp.core
+  :main ^:skip-aot intermine-nlp.template
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all}})
