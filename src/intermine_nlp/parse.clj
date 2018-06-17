@@ -50,9 +50,10 @@
   [text]
   (let [chunks (nlquery-to-chunk text)]
     (match chunks
-           [{:tag "NP"} {:tag "VP"} {:tag "NP"} {:tag "NP"}] true
+           [{:phrase :tag "NP"} {:tag "VP"} {:tag "NP"} {:tag "NP"}] true
            :else false
            )))
+
 
 ;; (defn text-to-ir
 ;;   "Match chunked text to internal representation (ir)"

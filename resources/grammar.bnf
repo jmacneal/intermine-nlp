@@ -1,0 +1,63 @@
+QUERY =
+  | PATH 'in' CONSTR
+  | PATH 'where' CONSTR
+  | PATH 'with' CONSTR
+  | PATH 'in which' CONSTR
+  | PATH 'for which' CONSTR
+  | PATH 'have' CONSTR
+  | 'show' QUERY
+  | 'show me' QUERY
+  | 'show all' QUERY
+  | 'show the' QUERY
+  | 'which' QUERY
+  | 'all' QUERY
+  | 'all the' QUERY
+  | 'all of the' QUERY
+  | 'for' QUERY
+  | 'list' QUERY
+  | 'list all' QUERY
+  | QUERY 'sort' SORT
+  | QUERY 'sort by' SORT
+
+PATH =
+  PATH 'and' PATH
+  | CLASS
+  | CLASS FIELD
+  | FIELD
+  | ORGANISM
+  | ORGANISM ',' CLASS
+  | ORGANISM ',' CLASS FIELD
+  | ORGANISM, 'show the' CLASS
+  | ORGANISM, 'show the' FIELD
+  | ORGANISM, 'show the' CLASS FIELD
+
+
+CONSTR =
+  CONSTR 'and' CONSTR
+  | CLASS 'exists'
+  | FIELD ONE_OF VALUES
+  | FIELD NONE_OF VALUES
+  | FIELD OVERLAPS VALUES
+  | FIELD NOVERLAPS VALUES
+  | FIELD EQ VALUE
+  | FIELD NEQ VALUE
+  | FIELD GT VALUE
+  | FIELD LT VALUE
+  | FIELD GEQ VALUE
+  | FIELD LEQ VALUE
+  | FIELD NULL VALUE
+  | FIELD NNULL VALUE
+  | FIELD CONTAINS VALUE
+
+FIELD
+
+VALUES =
+  VALUE VALUES
+  | epsilon
+
+VALUE
+
+SORT =
+  SORT SORT
+  | VALUE 'descend'
+  | VALUE 'ascend'
