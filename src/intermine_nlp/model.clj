@@ -1,17 +1,27 @@
 (ns intermine-nlp.model
   (:require [imcljs.fetch :as fetch]
+            [imcljs.path :as path]
             [clojure.edn :as edn]
             [clojure.java.io :as io]))
 
-
 (defn parse-model
   "Parse an intermine db model (as a nested map).
-  Returns a map of :class {:attributes {& attrs} :collections {& colls}}."
+  Returns a map of :class {attributes, collections, references}."
   [model]
   (let [classes (-> model :classes)]
     (apply merge
            (for [[k v] classes]
-             (hash-map k (select-keys v [:attributes :collections]))))))
+             (hash-map k (path/properties model k))))))
+
+(defn load-local-model
+  "Load a local copy of a model EDN file (backup for fetch-model).
+  Options are:
+  medic|fly|fly-b|human|yeast|rat|mouse"
+  [db-name]
+  (let [path (str "resources/db_models/" db-name "mine_model.edn")]
+    (try (with-open [file (io/reader path)]
+           (-> file java.io.PushbackReader. edn/read))
+         (catch Exception e (printf "Couldn't open local model '%s'." path)))))
 
 (defn fetch-model
   "Fetch a model for the given dataset. Defaults to flymine.
@@ -29,21 +39,11 @@
               "www.flymine.org/query")
         db-request {:root url
                     :token nil
-                    :model "genomic"}
-        model (try
-                (fetch/model db-request)
-                (catch java.lang.Exception e (load-local-model db-name)))]
-    (parse-model model)))
+                    :model "genomic"}]
+    (try
+      (fetch/model db-request)
+      (catch java.lang.Exception e (load-local-model db-name)))))
 
-(defn load-local-model
-  "Load a local copy of a model EDN file (backup for fetch-model).
-  Options are:
-  medic|fly|fly-b|human|yeast|rat|mouse"
-  [db-name]
-  (let [path (str "resources/db_models/" db-name "mine_model.edn")]
-    (try (with-open [file (io/reader path)]
-           (-> file java.io.PushbackReader. edn/read))
-         (catch Exception e (printf "Couldn't open local model '%s'." path)))))
 
 (defn store-model
   "Store a model in the appropriate directory (resources/db_models)."
