@@ -4,6 +4,7 @@
             [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.pprint :refer [pprint]]
+            [clojure.core.match :refer [match]]
             [intermine-nlp.util :as util]))
 
 (defn load-local-templates
@@ -18,23 +19,30 @@
 (defn fetch-templates-
   "Fetch templates for the given dataset. Defaults to flymine.
   Options are:
-  medic|fly|fly-b|human|yeast|rat|mouse"
-  [db-name]
-  (let [url (case db-name
-              "medic"    "medicmine.jcvi.org/medicmine"
-              "fly"      "www.flymine.org/query"
-              "human"    "www.humanmine.org/humanmine"
-              "yeast"    "yeastmine.yeastgenome.org/yeastmine"
-              "rat"      "ratmine.mcw.edu/ratmine"
-              "mouse"    "www.mousemine.org/mousemine"
-              "fly-beta" "beta.flymine.org/beta"
-              "www.flymine.org/query")
-        db-request {:root url
-                    :token nil
-                    :model "genomic"}]
-    (try
-      (fetch/templates db-request)
-      (catch java.lang.Exception e (load-local-templates db-name)))))
+  medic|fly|fly-b|human|yeast|rat|mouse
+  Accepts either a database name (fly, yeast...) or a service"
+  [db]
+  (match [db]
+         [{:root root}]
+         (try
+           (fetch/templates {:root root})
+           (catch java.lang.Exception e (print "Couldn't access database")))
+         [db-name]
+         (let [url (case db-name
+                     "medic"    "medicmine.jcvi.org/medicmine"
+                     "fly"      "www.flymine.org/query"
+                     "human"    "www.humanmine.org/humanmine"
+                     "yeast"    "yeastmine.yeastgenome.org/yeastmine"
+                     "rat"      "ratmine.mcw.edu/ratmine"
+                     "mouse"    "www.mousemine.org/mousemine"
+                     "fly-beta" "beta.flymine.org/beta"
+                     "www.flymine.org/query")
+               db-request {:root url
+                           :token nil
+                           :model {:name "genomic"}}]
+           (try
+             (fetch/templates db-request)
+             (catch java.lang.Exception e (load-local-templates db-name))))))
 
 (def fetch-templates
   (memoize fetch-templates-))
