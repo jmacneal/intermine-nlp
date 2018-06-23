@@ -31,6 +31,8 @@
   ;; (->> class-kws path/join-path (path/relationships (:model service)) keys)
   )
 
+;;; Memoize basic fetch functions
+
 (defn possible-values-
   "imcljs.fetch/possible-values seems to be broken, so here's an implementation
   using only imcljs.fetch/unique-values. 'path' must point to a field, not a class."
@@ -43,3 +45,7 @@
        (->> rows :body :results (map first) distinct)))
 
 (def possible-values (memoize possible-values-))
+
+
+(def summaries
+  (memoize (partial fetch/summary-fields)))
