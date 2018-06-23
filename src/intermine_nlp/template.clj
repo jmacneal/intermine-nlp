@@ -4,21 +4,7 @@
             [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.pprint :refer [pprint]]
-            [intermine-nlp.util :as util])
-  (:gen-class))
-
-(defn prepare-templates
-  "Move each query map in templates into another map.
-  Add a vector of additional (blank) natural language queries as well.
-  Pathquery queries are indexed by :pathquery, natural queries by :nlqueries"
-  [templates]
-  (loop [ks (keys templates) tmp templates]
-    (cond
-      (empty? ks) tmp
-      :else (recur (rest ks)
-                   (update-in tmp
-                              [(first ks)]
-                              #(hash-map :nlqueries [] :pathquery %))))))
+            [intermine-nlp.util :as util]))
 
 (defn load-local-templates
   "Load a local copy of templates EDN file (backup for fetch-templates).
@@ -29,7 +15,7 @@
     (util/read-edn path)))
 
 
-(defn fetch-templates
+(defn fetch-templates-
   "Fetch templates for the given dataset. Defaults to flymine.
   Options are:
   medic|fly|fly-b|human|yeast|rat|mouse"
@@ -50,33 +36,11 @@
       (fetch/templates db-request)
       (catch java.lang.Exception e (load-local-templates db-name)))))
 
+(def fetch-templates
+  (memoize fetch-templates-))
 
 (defn store-templates
   "Store templates map in the appropriate directory (test/queries/)."
   [templates path]
   (try (->> templates prn-str (spit path))
        (catch Exception e (printf "Couldn't store templates at '%s'." path))))
-
-
-;; (defn -main
-;;   "Take user input to insert English natural language query translations for
-;;   PathQuery queries stored in a templates file. Overwrites file on exit."
-;;   [& args]
-;;   (if-let [file-path (first args)]
-;;     (let [templates (util/read-edn file-path)]
-;;       (loop [ks (keys templates) tmp templates]
-;;         (print "Type an English query for the following (<ENTER> to skip, CTRL-c to exit).")
-;;         (cond
-;;           (empty? ks) tmp
-;;           :else
-;;           (do
-;;             (print (first ks))
-;;             (print (:description ((first ks) tmp)))
-;;             (print (select-keys tmp [:select :where :joins :orderBy :model]))
-;;             (let [input (read-line)]
-;;               (if (empty? input)
-;;                 (recur (rest ks)
-;;                        (update-in tmp
-;;                                   [(first ks) :nlqueries]
-;;                                   #(conj % input)))
-;;                 (recur (rest ks) tmp)))))))))
