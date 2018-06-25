@@ -5,6 +5,7 @@
             [clojure.java.io :as io]
             [clojure.pprint :refer [pprint]]
             [clojure.core.match :refer [match]]
+            [clojure.walk :refer [walk]]
             [intermine-nlp.util :as util]))
 
 (defn load-local-templates
@@ -52,3 +53,11 @@
   [templates path]
   (try (->> templates prn-str (spit path))
        (catch Exception e (printf "Couldn't store templates at '%s'." path))))
+
+(defn get-template-paths
+  "Returns a flattened list of all paths mentioned in constraints and views"
+  [templates]
+  (let [templates (vals templates)
+        views (flatten (map #(get % :select) templates))
+        constraints (walk #(-> % :where (map #(get % :path ))) flatten templates)]
+    ))
