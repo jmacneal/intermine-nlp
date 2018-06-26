@@ -4,21 +4,13 @@
             [clojure.pprint :refer [pprint]]
             [clojure.string :as string]
             [intermine-nlp.util :as util]
+            [intermine-nlp.template :as template]
             [imcljs.fetch :as im-fetch]
             [imcljs.path :as path]))
 
 
 
-;; (defn rand-query
-;;   "Given a data model, randomly walk the model to generate a simple
-;;   query, consisting of view(s) and constraint(s)."
-;;   [model]
-;;   (let [num-views (inc (rand-int 4))
-;;         num-constraints (inc (rand-int 4))
-;;         cls (rand-class model)]
-;;     {:select (rand-views)
-;;      :where (rand-constraints)}
-;;     ))
+
 
 (defn rand-class
   "Returns the keyword of a random class in model."
@@ -97,8 +89,6 @@
 
 ;;; other ops: "ONE_OF" "DOES_NOT_CONTAIN" "LOOKUP" "EXACT_MATCH"
 ;;;  "MATCH" "DOES_NOT_MATCH"    "IS_NULL"
-
-
 (def string-ops ["=" "!=" "<" ">" "<=" ">=" "CONTAINS" "LIKE"])
 (def int-ops ["=" "!=" "<" ">" "<=" ">="])
 (def bool-ops ["=" "!="])
@@ -183,19 +173,14 @@
   Default is flatly distributed, with optional weight vector for
   specifying a probability distribution. class-kws specifies path."
   [service num-views num-summaries num-constraints]
-  (let [model (:model service)
-        view-max-depth 5
-        constraint-max-depth 5
+  (let [view-max-depth 3
+        constraint-max-depth 3
+        model (:model service)
         view-depth (inc (rand-int view-max-depth))
         constraint-depth (inc (rand-int constraint-max-depth))
-        class-kw (rand-path model [])]
+        class-kw [(rand-class model)]]
     {:select (vec (flatten (concat
                             (rand-view model class-kw num-views view-depth)
                             (repeatedly num-summaries (partial rand-summary-view service class-kw view-depth)))))
      :where (vec (repeatedly num-constraints
-                         (partial rand-depth-constraint service class-kw constraint-depth)))})
-  ;; ([service class-kws max-depth probs]
-  ;;  (let [weighted-vec (flatten (map repeat probs max-depth))
-  ;;        depth (rand-nth weighted-vec)]
-  ;;    (rand-constraint service class-kws depth)))
-  )
+                         (partial rand-depth-constraint service class-kw constraint-depth)))}))
