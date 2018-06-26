@@ -1,6 +1,6 @@
 (ns intermine-nlp.template
-  (:require [imcljs.fetch :as fetch]
-            [imcljs.path :as path]
+  (:require [imcljs.fetch :as im-fetch]
+            [imcljs.path :as im-path]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.pprint :refer [pprint]]
@@ -26,7 +26,7 @@
   (match [db]
          [{:root root}]
          (try
-           (fetch/templates {:root root})
+           (im-fetch/templates {:root root})
            (catch java.lang.Exception e (print "Couldn't access database")))
          [db-name]
          (let [url (case db-name
@@ -42,7 +42,7 @@
                            :token nil
                            :model {:name "genomic"}}]
            (try
-             (fetch/templates db-request)
+             (im-fetch/templates db-request)
              (catch java.lang.Exception e (load-local-templates db-name))))))
 
 (def fetch-templates
@@ -59,5 +59,17 @@
   [templates]
   (let [templates (vals templates)
         views (flatten (map #(get % :select) templates))
-        constraints (walk #(-> % :where (map #(get % :path ))) flatten templates)]
-    ))
+        constraints (walk (comp (partial map #(get % :path)) :where) identity templates)]
+    (-> [views constraints] flatten distinct)))
+
+(defn in-template?
+  "Predicate: true if path exists in template, false otherwise."
+  [model templates path]
+  (let [template-paths (get-template-paths templates)
+        template-disp-names (flatten
+                             (map
+                              (partial im-path/display-name model)
+                              template-paths))
+        disp-name (im-path/display-name model path)]
+    (pprint disp-name)
+    (every? #(some #{%} template-disp-names) disp-name)))
