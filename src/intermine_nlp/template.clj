@@ -46,6 +46,10 @@
              (catch java.lang.Exception e (load-local-templates db-name))))))
 
 (def fetch-templates
+    "Fetch templates for the given dataset. Defaults to flymine.
+  Options are:
+  medic|fly|fly-b|human|yeast|rat|mouse
+  Accepts either a database name (fly, yeast...) or a service"
   (memoize fetch-templates-))
 
 (defn store-templates
@@ -64,12 +68,19 @@
 
 (defn in-template?
   "Predicate: true if path exists in template, false otherwise."
-  [model templates path]
-  (let [template-paths (get-template-paths templates)
+  [service path]
+  (let [model (:model service)
+        templates (fetch-templates service)
+        template-paths (get-template-paths templates)
         template-disp-names (flatten
                              (map
                               (partial im-path/display-name model)
                               template-paths))
         disp-name (im-path/display-name model path)]
-    (pprint disp-name)
     (every? #(some #{%} template-disp-names) disp-name)))
+
+(defn gen-in-template?
+  "Wrap in-template? with service, creating a continuation predicate function
+  of 1 variable"
+  [service]
+  (partial in-template? service))
