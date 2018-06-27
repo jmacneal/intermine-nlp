@@ -9,9 +9,6 @@
             [imcljs.path :as path]))
 
 
-
-
-
 (defn rand-class
   "Returns the keyword of a random class in model."
   [model]
@@ -68,7 +65,7 @@
           (or
            (empty? random-path)
            (= height depth)) {:path current-kws :field (rand-field model current-kws)}
-          (recur random-path (inc height))
+          (recur random-path (inc height) )
           ))))
 
 (defn attr->path
@@ -78,7 +75,9 @@
   [attribute-map]
   (let [class-kws (:path attribute-map)
         field-key (-> attribute-map :field :name keyword)]
-    (im-path/join-path (conj class-kws field-key))))
+    (try
+      (im-path/join-path (conj class-kws field-key))
+      (catch Exception e nil))))
 
 (defn rand-possible-value
   "Return a random legal/possible value for a given path."
@@ -124,9 +123,12 @@
   as well as a compatible operation and value. Returns a map containing
   :path :op :value."
   [service class-kws depth]
-  (let [attr (rand-attribute (:model service) class-kws depth)
+  (let [model (:model service)
+        ;; pred (or pred constantly)
+        attributes (repeatedly #(rand-attribute model class-kws depth))
+        attr (first (filter #(template/in-template? service (attr->path %)) attributes))
         path (attr->path attr)
-        field-type (-> attr :field :type)]
+        field-type (get-in attr [:field :type])]
     {:path path
      :op (rand-op field-type)
      :value (rand-value field-type)}))
@@ -145,8 +147,10 @@
 
 (defn rand-view
   "Selects n random views (paths) of given depth."
-  [model class-kws num-views depth]
-  (let [attrs (repeatedly num-views (partial rand-attribute model class-kws depth))]
+  [service class-kws num-views depth]
+  (let [model (:model service)
+        attributes (repeatedly #(rand-attribute model class-kws depth))
+        attrs (take num-views (filter #(template/in-template? service (attr->path %)) attributes))]
     (vec (map (partial attr->path) attrs))))
 
 (defn rand-summary-view
@@ -180,7 +184,7 @@
         constraint-depth (inc (rand-int constraint-max-depth))
         class-kw [(rand-class model)]]
     {:select (vec (flatten (concat
-                            (rand-view model class-kw num-views view-depth)
+                            (rand-view service class-kw num-views view-depth)
                             (repeatedly num-summaries (partial rand-summary-view service class-kw view-depth)))))
      :where (vec (repeatedly num-constraints
                          (partial rand-depth-constraint service class-kw constraint-depth)))}))
