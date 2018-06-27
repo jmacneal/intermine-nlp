@@ -26,6 +26,8 @@
        (->> rows :body :results (map first) distinct)))
 
 (def possible-values
+  "imcljs.fetch/possible-values seems to be broken, so here's an implementation
+  using only imcljs.fetch/unique-values. 'path' must point to a field, not a class."
   (memoize possible-values-))
 
 
