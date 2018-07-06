@@ -2,8 +2,16 @@
   (:require [clojure.pprint]
             [clojure.core.match :refer [match]]
             [opennlp.nlp :as nlp]
-            [opennlp.treebank :as treebank])
+            [opennlp.treebank :as treebank]
+            [instaparse.core :as insta]
+            ;; [instaparse.cfg :refer [ebnf]]
+            [instaparse.combinators :refer :all]
+            [imcljs.path :as im-path]
+            [clojure.pprint :refer [pprint]])
   (:gen-class))
+
+
+
 
 ;;; Internal Representation
 ;;;
@@ -46,13 +54,39 @@
   (-> text prepare-nlquery vector parser first treebank/make-tree))
 
 
-(defn parse-phrase
-  [text]
-  (let [chunks (nlquery-to-chunk text)]
-    (match chunks
-           [{:phrase :tag "NP"} {:tag "VP"} {:tag "NP"} {:tag "NP"}] true
-           :else false
-           )))
+(defn model-parser
+  "Parse an intermine model into an extended Backus-Naur form tree.
+  Consists of 2 productions: one for classes, one for all fields/attributes."
+  [model]
+  (let [classes (:classes model)
+        class-kws (keys classes)
+        class-paths (map #(im-path/join-path [%]) class-kws)
+        attr-map (map #(hash-map :class % :attrs (im-path/attributes model %)) class-paths)
+        attrs (distinct (flatten (map #(->> % :attrs keys ) attr-map)))]
+    (merge
+     {:CLASS (apply alt (map #(string %) class-paths))}
+     {:FIELD (apply alt (map #(string (im-path/join-path [%])) attrs))})
+    ))
+
+(defn gen-parser
+  ""
+  ([model]
+   (let [top-grammar (ebnf (slurp "resources/grammar.bnf"))
+         model-grammar (model-parser model)]
+     (insta/parser (merge top-grammar model-grammar))))
+  ([model top-grammar]
+   (let [model-grammar (model-parser model)]
+     (insta/parser (merge top-grammar model-grammar)))))
+
+;; (def p (insta/parser (instaparse.cfg/ebnf (slurp "resources/grammar.bnf")) :start :QUERY));
+
+;; (defn parse-phrase
+;;   [text]
+;;   (let [chunks (nlquery-to-chunk text)]
+;;     (match chunks
+;;            [{:phrase :tag "NP"} {:tag "VP"} {:tag "NP"} {:tag "NP"}] true
+;;            :else false
+;;            )))
 
 
 ;; (defn text-to-ir
