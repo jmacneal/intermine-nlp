@@ -13,6 +13,8 @@
                  [edu.stanford.nlp/stanford-corenlp "3.9.1"]
                  [edu.stanford.nlp/stanford-corenlp "3.9.1" :classifier "models"]
                  [instaparse "1.4.9"]
+                 [rhizome "0.2.9"]
+                 [clj-fuzzy "0.4.1"]
                  ;; [com.zensols.nlp/parse "0.1.4"]
                  ]
   ;; :main ^:skip-aot intermine-nlp.core
