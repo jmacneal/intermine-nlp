@@ -10,10 +10,20 @@
 
 
 (defn rand-class
-  "Returns the keyword of a random class in model."
-  [model]
-  (let [classes (-> model :classes (keys))]
-    (rand-nth classes)))
+  "Returns the keyword of a random class in model.
+  Optional: supply a filter predicate and a minimum depth and number of paths.
+  Returns the first random class "
+  ([service]
+   (let [model (:model service)
+         classes (-> model :classes keys)]
+     (rand-nth classes)))
+  ([service pred num depth]
+   (let [model (:model service)
+         filtered-classes (filter pred (-> model :classes keys))]
+     (loop [random-class (rand-nth filtered-classes)]
+       (if
+           (not-empty (rand-view service [random-class] num depth)) random-class
+           (recur (rand-nth filtered-classes)))))))
 
 (defn rand-val
   "Get a random value from a map"
@@ -21,7 +31,7 @@
   (-> m vals rand-nth))
 
 (defn rand-field
-  "Given a model and path (seq of class keywords), return a random attribute."
+  "Given a model and class-kws (seq of class keywords), return a random attribute."
   [model class-kws]
   (let [path (im-path/join-path class-kws)
         [& classes] class-kws]
@@ -58,13 +68,13 @@
   a random attribute. If it bottoms out before reaching depth, returns
   immediately."
   [model class-kws depth]
-  (loop [current-kws class-kws height 0]
+  (loop [current-kws class-kws height (inc (count class-kws))]
     (let [path (im-path/join-path current-kws)
           random-path (rand-path model current-kws)]
       (if
           (or
            (empty? random-path)
-           (= height depth)) {:path current-kws :field (rand-field model current-kws)}
+           (>= height depth)) {:path current-kws :field (rand-field model current-kws)}
           (recur random-path (inc height) )
           ))))
 
@@ -86,24 +96,46 @@
     (rand-nth possible-values)))
 
 
-;;; other ops: "ONE_OF" "DOES_NOT_CONTAIN" "LOOKUP" "EXACT_MATCH"
-;;;  "MATCH" "DOES_NOT_MATCH"    "IS_NULL"
-(def string-ops ["=" "!=" "<" ">" "<=" ">=" "CONTAINS" "LIKE"])
+(def JOIN_STYLES ["INNER", "OUTER"])
+(def BIO_FORMATS ["gff3", "fasta", "bed"])
+(def NULL_OPS ["IS NULL", "IS NOT NULL"])
+(def ATTRIBUTE_VALUE_OPS ["=", "!=", ">", ">=", "<", "<=", "CONTAINS", "LIKE", "NOT LIKE"])
+(def MULTIVALUE_OPS ["ONE OF", "NONE OF"])
+(def RANGE_OPS ["OVERLAPS", "DOES NOT OVERLAP", "OUTSIDE", "WITHIN", "CONTAINS", "DOES NOT CONTAIN"])
+(def TERNARY_OPS ["LOOKUP"])
+(def LOOP_OPS ["=", "!="])
+(def LIST_OPS ["IN", "NOT IN"])
+
+(def string-ops ["=" "!=" "CONTAINS" "LIKE" "NOT LIKE" ])
 (def int-ops ["=" "!=" "<" ">" "<=" ">="])
 (def bool-ops ["=" "!="])
 
 (defn rand-op
   "Returns a random operation of given type and arity (single vs multiple)."
-  [type]
-  (case type
-    "java.lang.String" (rand-nth string-ops)
-    "java.lang.Integer" (rand-nth int-ops)
-    "int" (rand-nth int-ops)
-    "java.lang.Double" (rand-nth int-ops)
-    "java.lang.Float" (rand-nth int-ops)
-    "java.lang.Boolean" (rand-nth bool-ops)
-    "org.intermine.objectstore.query.ClobAccess" nil
-    ))
+  [type & [opts]]
+  (cond
+    ;; Unary operator
+    (:unary opts) nil
+    ;; Multi-value operator
+    (:mult opts) nil
+    ;; Lookup operator
+    (:lookup opts) nil
+    ;; List operator
+    (:list opts) nil
+    ;; Type operator
+    (:type opts) nil
+    ;; Loop operator
+    (:loop opts) nil
+    ;; Binary operator
+    :else (case type
+            "java.lang.String" (rand-nth string-ops)
+            "java.lang.Integer" (rand-nth int-ops)
+            "int" (rand-nth int-ops)
+            "java.lang.Double" (rand-nth int-ops)
+            "java.lang.Float" (rand-nth int-ops)
+            "java.lang.Boolean" (rand-nth bool-ops)
+            "org.intermine.objectstore.query.ClobAccess" nil
+            )))
 
 (defn rand-value
   "Generate a random value of a given type (doesn't necessarily occur in database)."
@@ -112,8 +144,8 @@
          "java.lang.String" (apply str (take 10 (repeatedly #(char (+ (rand 26) 65)))))
          "java.lang.Integer" (rand-int 10000)
          "int" (rand-int 10000)
-         "java.lang.Double" (rand 100)
-         "java.lang.Float" (rand 100)
+         "java.lang.Double" (float (rand 100))
+         "java.lang.Float" (float (rand 100))
          "java.lang.Boolean" (rand-nth [true false])
          "org.intermine.objectstore.query.ClobAccess" nil
          )))
@@ -149,9 +181,17 @@
   "Selects n random views (paths) of given depth."
   [service class-kws num-views depth]
   (let [model (:model service)
-        attributes (repeatedly #(rand-attribute model class-kws depth))
-        attrs (take num-views (filter #(template/in-template? service (attr->path %)) attributes))]
-    (vec (map (partial attr->path) attrs))))
+        attrs (repeatedly 100 #(rand-attribute model class-kws depth))
+        filtered-attrs (take num-views (filter #(template/in-template? service (attr->path %)) attrs))]
+    (vec (map (partial attr->path) filtered-attrs))))
+
+(defn rand-views
+  "Selects n random views (paths) of given depth."
+  [service class-kws num-views depth]
+  (let [model (:model service)
+        attrs (repeatedly #(rand-attribute model class-kws depth))
+        filtered-attrs (filter #(template/in-template? service (attr->path %)) attrs)]
+    (map (partial attr->path) filtered-attrs)))
 
 (defn rand-summary-view
   "Like rand-view, but returns a summary view for a relation (class) rather than a
@@ -182,9 +222,12 @@
         model (:model service)
         view-depth (inc (rand-int view-max-depth))
         constraint-depth (inc (rand-int constraint-max-depth))
-        class-kw [(rand-class model)]]
-    {:select (vec (flatten (concat
-                            (rand-view service class-kw num-views view-depth)
-                            (repeatedly num-summaries (partial rand-summary-view service class-kw view-depth)))))
+        pred #(template/in-template? service (im-path/join-path [%]))
+        class-kw [(rand-class service pred (max num-views num-constraints)
+                              (max view-max-depth constraint-max-depth))]]
+    {:select (vec (flatten
+                   (concat
+                    (rand-view service class-kw num-views view-depth)
+                    (repeatedly num-summaries (partial rand-summary-view service class-kw view-depth)))))
      :where (vec (repeatedly num-constraints
-                         (partial rand-depth-constraint service class-kw constraint-depth)))}))
+                             (partial rand-depth-constraint service class-kw constraint-depth)))}))
