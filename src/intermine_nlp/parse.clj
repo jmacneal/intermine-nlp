@@ -73,10 +73,10 @@
   ([model]
    (let [top-grammar (ebnf (slurp "resources/grammar.bnf"))
          model-grammar (model-parser model)]
-     (insta/parser (merge top-grammar model-grammar))))
+     (insta/parser (merge top-grammar model-grammar) :start :QUERY)))
   ([model top-grammar]
    (let [model-grammar (model-parser model)]
-     (insta/parser (merge top-grammar model-grammar)))))
+     (insta/parser (merge top-grammar model-grammar) :start :QUERY))))
 
 ;; (def p (insta/parser (instaparse.cfg/ebnf (slurp "resources/grammar.bnf")) :start :QUERY));
 
