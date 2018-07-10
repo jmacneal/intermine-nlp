@@ -1,5 +1,5 @@
 QUERY =
-  | PATH 'in' CONSTR
+  PATH
   | PATH 'where' CONSTR
   | PATH 'with' CONSTR
   | PATH 'in which' CONSTR
@@ -16,6 +16,7 @@ QUERY =
   | 'for' QUERY
   | 'list' QUERY
   | 'list all' QUERY
+  | 'what is' QUERY
   | QUERY 'sort' SORT
   | QUERY 'sort by' SORT
 
@@ -27,37 +28,88 @@ PATH =
   | ORGANISM
   | ORGANISM ',' CLASS
   | ORGANISM ',' CLASS FIELD
-  | ORGANISM, 'show the' CLASS
-  | ORGANISM, 'show the' FIELD
-  | ORGANISM, 'show the' CLASS FIELD
+  | ORGANISM 'show the' CLASS
+  | ORGANISM 'show the' FIELD
+  | ORGANISM 'show the' CLASS FIELD
 
 
 CONSTR =
   CONSTR 'and' CONSTR
   | CLASS 'exists'
-  | FIELD ONE_OF VALUES
-  | FIELD NONE_OF VALUES
-  | FIELD OVERLAPS VALUES
-  | FIELD NOVERLAPS VALUES
-  | FIELD EQ VALUE
-  | FIELD NEQ VALUE
-  | FIELD GT VALUE
-  | FIELD LT VALUE
-  | FIELD GEQ VALUE
-  | FIELD LEQ VALUE
-  | FIELD NULL VALUE
-  | FIELD NNULL VALUE
-  | FIELD CONTAINS VALUE
+  | FIELD 'ONE_OF' VALUES
+  | FIELD 'NONE_OF' VALUES
+  | FIELD 'OVERLAPS' VALUES
+  | FIELD 'NOVERLAPS' VALUES
+  | FIELD COMPARE VALUE
+  | FIELD 'NULL' VALUE
+  | FIELD 'NNULL' VALUE
+  | FIELD 'CONTAINS' VALUE
 
-FIELD
+COMPARE =
+  EQ
+  | NEQ
+  | GT
+  | LT
+  | GEQ
+  | LEQ
 
-VALUES =
-  VALUE VALUES
-  | epsilon
+EQ =
+  'EQ'
+  | 'equal'
+  | 'equal to'
+  | 'equals'
+  | '='
 
-VALUE
+
+NEQ =
+  'NEQ'
+  | 'not equal'
+  | 'not equal to'
+  | 'doesn\'t equal'
+  | 'does not equal'
+  | '!='
+
+GT =
+  'GT'
+  | 'greater'
+  | 'greater than'
+  | 'over'
+  | 'more than'
+  | '>'
+
+LT =
+  'LT'
+  | 'lesser'
+  | 'less'
+  | 'lesser than'
+  | 'less than'
+  | 'below'
+  | 'under'
+  | '<'
+
+GEQ =
+  GT 'or' EQ
+
+LEQ =
+  LT 'or' EQ
+
+
+RELATION =
+  'one of'
+  | 'not one of'
+  | 'overlaps'
+
 
 SORT =
   SORT SORT
   | VALUE 'descend'
   | VALUE 'ascend'
+
+VALUES =
+  VALUE*
+
+VALUE =
+  #"[0-9a-zA-Z]+"
+
+ORGANISM =
+  'Fly'
