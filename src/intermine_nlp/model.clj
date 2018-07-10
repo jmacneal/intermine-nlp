@@ -4,15 +4,6 @@
             [clojure.edn :as edn]
             [clojure.java.io :as io]))
 
-(defn parse-model
-  "Parse an intermine db model (as a nested map).
-  Returns a map of :class {attributes, collections, references}."
-  [model]
-  (let [classes (-> model :classes)]
-    (apply merge
-           (for [[k v] classes]
-             (hash-map k (path/properties model k))))))
-
 (defn load-local-model
   "Load a local copy of a model EDN file (backup for fetch-model).
   Options are:
