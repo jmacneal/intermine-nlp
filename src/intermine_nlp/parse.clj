@@ -25,6 +25,11 @@
 ;;; to be translated into PathQuery-friendly terms. That is done using matching,
 ;;; in a secondary phase.
 
+(defonce core-nlp (delay (StanfordLemmatizer .)))
+
+(defn lemmatize [^String text]
+  (let [^StanfordLemmatizer nlp @core-nlp]
+    (.lemmatize nlp text)))
 
 (def get-sentences (nlp/make-sentence-detector "resources/nlp_models/en-sent.bin"))
 (def tokenize (nlp/make-tokenizer "resources/nlp_models/en-token.bin"))
@@ -65,20 +70,25 @@
         attrs (distinct (flatten (map #(->> % :attrs keys ) attr-map)))]
     (merge
      {:CLASS (apply alt (map #(string %) class-paths))}
-     {:FIELD (apply alt (map #(string (im-path/join-path [%])) attrs))})
-    ))
+     {:FIELD (apply alt (map #(string (im-path/join-path [%])) attrs))})))
 
 (defn gen-parser
-  ""
+  "Generate an instaparse parser object by merging a top-level parser (default: grammar.bnf)
+  with a model-specific parser."
   ([model]
    (let [top-grammar (ebnf (slurp "resources/grammar.bnf"))
          model-grammar (model-parser model)]
-     (insta/parser (merge top-grammar model-grammar) :start :QUERY)))
+     (insta/parser (merge top-grammar model-grammar)
+                   :start :QUERY
+                   :auto-whitespace :standard
+                   :string-ci true
+)))
   ([model top-grammar]
    (let [model-grammar (model-parser model)]
-     (insta/parser (merge top-grammar model-grammar) :start :QUERY))))
-
-;; (def p (insta/parser (instaparse.cfg/ebnf (slurp "resources/grammar.bnf")) :start :QUERY));
+     (insta/parser (merge top-grammar model-grammar)
+                   :start :QUERY
+                   :auto-whitespace :standard
+                   :string-ci true))))
 
 ;; (defn parse-phrase
 ;;   [text]
