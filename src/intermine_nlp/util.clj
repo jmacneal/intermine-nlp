@@ -5,7 +5,8 @@
             [imcljs.fetch :as fetch]
             [imcljs.path :as path]
             [clojure.core.async :refer [<! go]]
-            [clojure.string :refer [join split]]))
+            [clojure.string :refer [join split]]
+            [clj-http.client :as http]))
 
 (defn read-edn
   "Read an edn file into a map"
@@ -30,6 +31,16 @@
   using only imcljs.fetch/unique-values. 'path' must point to a field, not a class."
   (memoize possible-values-))
 
-
 (def summaries
   (memoize (partial fetch/summary-fields)))
+
+(defn prepare-nlquery
+  "Raw natural language queries must end in a period"
+  [text]
+  (let [last-char (subs text (dec (count text)))]
+    (if
+        (or
+         (= last-char ".")
+         (= last-char "?")
+         (= last-char "!")) text
+        (str text "."))))
