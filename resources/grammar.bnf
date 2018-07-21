@@ -5,8 +5,13 @@ QUERY =
   | PATH 'in which' CONSTR
   | PATH 'for which' CONSTR
   | PATH 'have' CONSTR
+  | PATH 'are' CONSTR
+  | PATH 'is' CONSTR
+  | PATH 'have' CONSTR
+  | PATH CONSTR
   | 'show' QUERY
   | 'show me' QUERY
+  | 'show I' QUERY
   | 'show all' QUERY
   | 'show the' QUERY
   | 'which' QUERY
@@ -35,17 +40,44 @@ PATH =
 
 CONSTR =
   CONSTR 'and' CONSTR
+  | CONSTR 'or' CONSTR
   | CLASS 'exists'
-  | FIELD 'ONE_OF' VALUES
-  | FIELD 'NONE_OF' VALUES
-  | FIELD 'OVERLAPS' VALUES
-  | FIELD 'NOVERLAPS' VALUES
   | FIELD COMPARE VALUE
-  | FIELD 'NULL' VALUE
-  | FIELD 'NNULL' VALUE
-  | FIELD 'CONTAINS' VALUE
+  | VALUE COMPARE FIELD
+  | FIELD MULTI_COMPARE VALUES
+  | VALUES MULTI_COMPARE FIELD
+  | UNARY_OP FIELD
+  | FIELD UNARY_OP
+
 
 COMPARE =
+  STR_COMP
+  | MATH_COMP
+  | LIST_COMP
+
+STR_COMP =
+  EQ
+  | NEQ
+  | CONTAINS
+  | LIKE
+  | NLIKE
+
+CONTAINS =
+  "contains"
+  | "contain"
+  | "has"
+  | "in"
+
+LIKE =
+  "like"
+  | "similar to"
+  | "resembles"
+
+NLIKE =
+  "not" LIKE
+  | "isn't" LIKE
+
+MATH_COMP =
   EQ
   | NEQ
   | GT
@@ -89,16 +121,70 @@ LT =
 
 GEQ =
   GT 'or' EQ
+  | '>='
 
 LEQ =
   LT 'or' EQ
+  | '<='
 
 
-RELATION =
-  'one of'
-  | 'not one of'
-  | 'overlaps'
+LIST_COMP =
+  "%NOT IMPLEMENTED"
 
+MULTI_COMPARE =
+  M_ONE_OF
+  | M_NONE_OF
+  | M_OVERLAPS
+  | M_NOVERLAPS
+  | M_OUTSIDE
+  | M_WITHIN
+  | M_CONTAINS
+  | M_NCONTAINS
+
+M_ONE_OF =
+  "one of"
+  | "contained in"
+  | "in"
+  | "either"
+
+M_NONE_OF =
+  "not" M_ONE_OF
+  | "isn't" M_ONE_OF
+  | "neither"
+
+M_OVERLAPS =
+  "between"
+  | "in between"
+
+M_NOVERLAPS =
+  "not" M_OVERLAPS
+  | "isn't" M_OVERLAPS
+
+M_OUTSIDE =
+  "%NOT IMPLEMENTED"
+
+M_WITHIN =
+  "%NOT IMPLEMENTED"
+
+M_CONTAINS =
+  "%NOT IMPLEMENTED"
+
+M_NCONTAINS =
+  "%NOT IMPLEMENTED"
+
+UNARY_OP =
+  NULL
+  | NNULL
+
+NULL =
+  "null"
+  | "empty"
+
+NNULL =
+  "not null"
+  | "isn't null"
+  | "not empty"
+  | "isn't empty"
 
 SORT =
   SORT SORT
@@ -106,10 +192,10 @@ SORT =
   | VALUE 'ascend'
 
 VALUES =
-  VALUE*
+  VALUE VALUE+
 
 VALUE =
-  #"[0-9a-zA-Z]+"
+  #"[ 0-9a-zA-Z]+"
 
 ORGANISM =
   'Fly'
