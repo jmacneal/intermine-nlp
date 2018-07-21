@@ -10,10 +10,12 @@
   :dependencies [[org.clojure/clojure "1.8.0"]
                  ;; [org.intermine/imcljs "0.5.1"]
                  [org.intermine/imcljs "0.6.0-SNAPSHOT"]
+                 [clj-http "3.9.0"]
                  [org.clojure/core.async "0.2.395"]
                  [org.clojure/core.match "0.3.0-alpha5"]
                  [clojure-opennlp "0.4.0"]
                  ;; [org.clojurenlp/core "3.7.0"]
+                 ;; [com.zensols.nlp/parse "0.1.4"]
                  [edu.stanford.nlp/stanford-corenlp "3.9.1"]
                  [edu.stanford.nlp/stanford-corenlp "3.9.1" :classifier "models"]
                  [edu.stanford.nlp/stanford-parser "3.9.1"]
@@ -21,9 +23,8 @@
                  [instaparse "1.4.9"]
                  [rhizome "0.2.9"]
                  [clj-fuzzy "0.4.1"]
-                 ;; [com.zensols.nlp/parse "0.1.4"]
                  ]
-  ;; :main ^:skip-aot intermine-nlp.core
-  :main ^:skip-aot intermine-nlp.parse
+  :main ^:skip-aot intermine-nlp.core
+  ;; :main ^:skip-aot intermine-nlp.nlp
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all}})
