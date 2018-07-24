@@ -24,6 +24,9 @@ QUERY =
   | 'what is' QUERY
   | QUERY 'sort' SORT
   | QUERY 'sort by' SORT
+  | QUERY "?"
+  | QUERY "."
+  | QUERY "!"
 
 PATH =
   PATH 'and' PATH
@@ -44,6 +47,8 @@ CONSTR =
   | CLASS 'exists'
   | FIELD COMPARE VALUE
   | VALUE COMPARE FIELD
+  | FIELD VALUE
+  | VALUE FIELD
   | FIELD MULTI_COMPARE VALUES
   | VALUES MULTI_COMPARE FIELD
   | UNARY_OP FIELD
