@@ -1,14 +1,14 @@
 QUERY =
-  PATH
-  | PATH 'where' CONSTR
-  | PATH 'with' CONSTR
-  | PATH 'in which' CONSTR
-  | PATH 'for which' CONSTR
-  | PATH 'have' CONSTR
-  | PATH 'are' CONSTR
-  | PATH 'is' CONSTR
-  | PATH 'have' CONSTR
-  | PATH CONSTR
+  VIEW
+  | VIEW 'where' CONSTR
+  | VIEW 'with' CONSTR
+  | VIEW 'in which' CONSTR
+  | VIEW 'for which' CONSTR
+  | VIEW 'have' CONSTR
+  | VIEW 'are' CONSTR
+  | VIEW 'is' CONSTR
+  | VIEW 'have' CONSTR
+  | VIEW CONSTR
   | 'show' QUERY
   | 'show me' QUERY
   | 'show I' QUERY
@@ -28,8 +28,8 @@ QUERY =
   | QUERY "."
   | QUERY "!"
 
-PATH =
-  PATH 'and' PATH
+VIEW =
+  VIEW 'and' VIEW
   | CLASS
   | CLASS FIELD
   | FIELD
