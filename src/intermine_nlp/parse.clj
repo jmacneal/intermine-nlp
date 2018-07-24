@@ -4,31 +4,39 @@
             [instaparse.combinators :refer :all]
             [imcljs.path :as im-path]
             [clojure.pprint :refer [pprint]]
-            [intermine-nlp.nlp :as nlp])
+            [intermine-nlp.nlp :as nlp]
+            [clojure.string :as string])
   (:gen-class))
 
 (defn model-parser
   "Generate a parser for an intermine model.
   Consists of 2 productions: one for classes, one for all fields/attributes.
-  options:
-         :lematize (default = false)
   "
-  [model & {:as options}]
-  (let [classes (:classes model)
-        class-kws (keys classes)
-        class-paths (map #(im-path/join-path [%]) class-kws)
-        attr-map (map #(hash-map :class % :attrs (im-path/attributes model %)) class-paths)
-        attr-keys (distinct (flatten (map #(->> % :attrs keys)  attr-map)))
-        attrs (if (:lemmatize options)
-                (map (comp nlp/lemmatize name) attr-keys)
-                (map name attr-keys))]
-    (merge
-     {:CLASS (apply alt (map #(string %) class-paths))}
-     {:FIELD (apply alt (map #(string %) attrs))})))
+  ([model]
+   (let [classes (:classes model)
+         class-kws (keys classes)
+         class-paths (map name class-kws)
+         class-lemma-map (nlp/lemma-map (string/join " " class-paths))
+         attr-map (map #(hash-map :class % :attrs (im-path/attributes model %)) class-paths)
+         attr-keys (distinct (flatten (map #(->> % :attrs keys)  attr-map)))
+         attrs (map name attr-keys)]
+     (merge
+      {:FIELD (apply alt (map #(string %) attrs))}
+      {:CLASS (apply alt (map #(string %) class-paths))})))
+
+  ([model class-lemma-map]
+   (let [class-paths (keys class-lemma-map)
+         attr-map (map #(hash-map :class % :attrs (im-path/attributes model %)) class-paths)
+         attr-keys (distinct (flatten (map #(->> % :attrs keys)  attr-map)))
+         attrs (map (comp nlp/lemmatize-as-text name) attr-keys)]
+     (merge
+      {:FIELD (apply alt (map #(string %) attrs))}
+      {:CLASS (apply alt (map #(string %) (vals class-lemma-map)))}))))
 
 (defn gen-parser
   "Generate an instaparse parser object by merging a top-level parser (default: grammar.bnf)
-  with a model-specific parser."
+  with a model-specific parser.
+  "
   ([model]
    (let [top-grammar (ebnf (slurp "resources/grammar.bnf"))
          model-grammar (model-parser model)]
@@ -36,8 +44,15 @@
                    :start :QUERY
                    :auto-whitespace :standard
                    :string-ci true)))
-  ([model top-grammar]
-   (let [model-grammar (model-parser model)]
+  ([model class-lemma-map]
+   (let [top-grammar (ebnf (slurp "resources/grammar.bnf"))
+         model-grammar (model-parser model class-lemma-map)]
+     (insta/parser (merge top-grammar model-grammar)
+                   :start :QUERY
+                   :auto-whitespace :standard
+                   :string-ci true)))
+  ([model top-grammar class-lemma-map]
+   (let [model-grammar (model-parser model class-lemma-map)]
      (insta/parser (merge top-grammar model-grammar)
                    :start :QUERY
                    :auto-whitespace :standard
