@@ -9,22 +9,6 @@
             [imcljs.path :as path]))
 
 
-(defn rand-class
-  "Returns the keyword of a random class in model.
-  Optional: supply a filter predicate and a minimum depth and number of paths.
-  Returns the first random class "
-  ([service]
-   (let [model (:model service)
-         classes (-> model :classes keys)]
-     (rand-nth classes)))
-  ([service pred num depth]
-   (let [model (:model service)
-         filtered-classes (filter pred (-> model :classes keys))]
-     (loop [random-class (rand-nth filtered-classes)]
-       (if
-           (not-empty (rand-view service [random-class] num depth)) random-class
-           (recur (rand-nth filtered-classes)))))))
-
 (defn rand-val
   "Get a random value from a map"
   [m]
@@ -211,6 +195,21 @@
           summary (top-path-kw (util/summaries service))]
       (vec (map (partial merge-paths path) summary)))))
 
+(defn rand-class
+  "Returns the keyword of a random class in model.
+  Optional: supply a filter predicate and a minimum depth and number of paths.
+  Returns the first random class "
+  ([service]
+   (let [model (:model service)
+         classes (-> model :classes keys)]
+     (rand-nth classes)))
+  ([service pred num depth]
+   (let [model (:model service)
+         filtered-classes (filter pred (-> model :classes keys))]
+     (loop [random-class (rand-nth filtered-classes)]
+       (if
+           (not-empty (rand-view service [random-class] num depth)) random-class
+           (recur (rand-nth filtered-classes)))))))
 
 (defn rand-query
   "Returns a random constraint with depth between 1 and 'depth'.
