@@ -49,14 +49,3 @@
 
 (def summaries
   (memoize (partial fetch/summary-fields)))
-
-(defn prepare-nlquery
-  "Raw natural language queries must end in a period"
-  [text]
-  (let [last-char (subs text (dec (count text)))]
-    (if
-        (or
-         (= last-char ".")
-         (= last-char "?")
-         (= last-char "!")) text
-        (str text "."))))
