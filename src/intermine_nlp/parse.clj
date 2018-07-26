@@ -39,21 +39,21 @@
   "
   ([model]
    (let [top-grammar (ebnf (slurp "resources/grammar.bnf"))
-         model-grammar (model-grammar model)]
-     (insta/parser (merge top-grammar model-grammar)
+         bottom-grammar (model-grammar model)]
+     (insta/parser (merge top-grammar bottom-grammar)
                    :start :QUERY
                    :auto-whitespace :standard
                    :string-ci true)))
   ([model class-lemma-map]
    (let [top-grammar (ebnf (slurp "resources/grammar.bnf"))
-         model-grammar (model-parser model class-lemma-map)]
-     (insta/parser (merge top-grammar model-grammar)
+         bottom-grammar (model-grammar model class-lemma-map)]
+     (insta/parser (merge top-grammar bottom-grammar)
                    :start :QUERY
                    :auto-whitespace :standard
                    :string-ci true)))
   ([model top-grammar class-lemma-map]
-   (let [model-grammar (model-parser model class-lemma-map)]
-     (insta/parser (merge top-grammar model-grammar)
+   (let [bottom-grammar (model-grammar model class-lemma-map)]
+     (insta/parser (merge top-grammar bottom-grammar)
                    :start :QUERY
                    :auto-whitespace :standard
                    :string-ci true))))
@@ -70,7 +70,7 @@
 
 (def transform-map
   {:QUERY (fn [& children] (remove string? children))
-   :VIEW (fn [& children] (insta/transform view-map children))
+  :VIEW (fn [& children] (insta/transform view-map children))
    :CONSTR (fn [& children] [:CONSTR (remove string? children)])
    :VALUE (fn [text] [:VALUE text])})
 
