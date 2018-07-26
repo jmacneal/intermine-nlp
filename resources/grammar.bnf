@@ -22,6 +22,7 @@ QUERY =
   | 'list' QUERY
   | 'list all' QUERY
   | 'what is' QUERY
+  | 'I want to see' QUERY
   | QUERY 'sort' SORT
   | QUERY 'sort by' SORT
   | QUERY "?"
@@ -44,6 +45,7 @@ VIEW =
 CONSTR =
   CONSTR 'and' CONSTR
   | CONSTR 'or' CONSTR
+  | VALUE
   | CLASS 'exists'
   | FIELD COMPARE VALUE
   | VALUE COMPARE FIELD
@@ -200,7 +202,7 @@ VALUES =
   VALUE VALUE+
 
 VALUE =
-  #"[ 0-9a-zA-Z]+"
+  #"[0-9a-zA-Z]+"
 
 ORGANISM =
   'Fly'
