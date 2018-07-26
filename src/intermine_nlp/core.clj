@@ -5,7 +5,8 @@
             [intermine-nlp.model :as model]
             [intermine-nlp.util :as util]
             [instaparse.core :as insta]
-            [clojure.string :as string])
+            [clojure.string :as string]
+            [clojure.pprint :refer [pprint]])
   (:gen-class))
 
 
@@ -18,26 +19,6 @@
   "Read a PathQuery from a file (for testing)"
   [path]
   (-> path slurp read-string :pathquery))
-
-(defn parse-tree-to-query
-  "TODO: translate internal representation (ir) to PathQuery (JSON/XML)"
-  [tree])
-
-
-(def transform-view
-  {:ORGANISM (fn [text] {:from text})
-   :CLASS (fn [text] {:select text})
-   :FIELD (fn [text] {:select text})})
-
-(def transform-constraint
-  {:CLASS (fn [text] [:from text])
-   :FIELD (fn [text] [:select text])})
-
-(def transform-map
-  {:QUERY (fn [& children] (remove string? children))
-   :VIEW (fn [& children] (insta/transform transform-view children))
-   :CONSTR (fn [& children] [:CONSTR (remove string? children)])
-   :VALUE (fn [text] [:VALUE text])})
 
 
 (defn parser-pipeline
@@ -57,10 +38,12 @@
         (:lemmatize options) nlp/lemmatize-as-text
         (:lemmatize options) parser-lemmatized
         (not (:lemmatize options)) parser
-        (:lemmatize options) (insta/transform transform-map))))
-
+        ;; (:lemmatize options) transform tree
+        )))
 
 (defn -main
-  "I don't do a whole lot ... yet."
-  [& args]
-  (println "Hello, World!"))
+  "In the future I'll return a query, right now I'll just give you the parse tree."
+  [^String text]
+  (let [fly-model (model/fetch-model "fly")
+        pipeline (parser-pipeline fly-model :lemmatize true)]
+    (pprint (pipeline text))))
