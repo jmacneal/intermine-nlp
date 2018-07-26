@@ -8,8 +8,8 @@
             [clojure.string :as string])
   (:gen-class))
 
-(defn model-parser
-  "Generate a parser for an intermine model.
+(defn model-grammar
+  "Generate a grammar (parse map) for an intermine model.
   Consists of 2 productions: one for classes, one for all fields/attributes.
   "
   ([model]
@@ -39,7 +39,7 @@
   "
   ([model]
    (let [top-grammar (ebnf (slurp "resources/grammar.bnf"))
-         model-grammar (model-parser model)]
+         model-grammar (model-grammar model)]
      (insta/parser (merge top-grammar model-grammar)
                    :start :QUERY
                    :auto-whitespace :standard
@@ -57,3 +57,24 @@
                    :start :QUERY
                    :auto-whitespace :standard
                    :string-ci true))))
+
+;;; Parse Tree transformations
+(def view-map
+  {:ORGANISM (fn [text] {:from text})
+   :CLASS (fn [text] {:select text})
+   :FIELD (fn [text] {:select text})})
+
+(def constraint-map
+  {:CLASS (fn [text] [:from text])
+   :FIELD (fn [text] [:select text])})
+
+(def transform-map
+  {:QUERY (fn [& children] (remove string? children))
+   :VIEW (fn [& children] (insta/transform view-map children))
+   :CONSTR (fn [& children] [:CONSTR (remove string? children)])
+   :VALUE (fn [text] [:VALUE text])})
+
+(defn transform-tree
+  "Transform a parse tree according "
+  [parse-tree]
+  (insta/transform transform-map parse-tree))
