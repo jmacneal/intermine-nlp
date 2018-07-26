@@ -3,7 +3,6 @@
             [opennlp.treebank :as treebank]
             [imcljs.path :as im-path]
             [clojure.pprint :refer [pprint]]
-            [intermine-nlp.util :refer [prepare-nlquery]]
             [clojure.string :as string])
   (:import  [lemmatizer StanfordLemmatizer])
   (:gen-class))
@@ -20,6 +19,16 @@
 (def chunker (treebank/make-treebank-chunker "resources/nlp_models/en-chunker.bin"))
 (def parser (treebank/make-treebank-parser "resources/nlp_models/en-parser-chunking.bin"))
 
+(defn prepare-nlquery
+  "Raw natural language queries must end in a period for some OpenNLP functions"
+  [text]
+  (let [last-char (subs text (dec (count text)))]
+    (if
+        (or
+         (= last-char ".")
+         (= last-char "?")
+         (= last-char "!")) text
+        (str text "."))))
 
 (defn nlquery-to-chunk
   "Use NLP to convert raw text to chunked form"
@@ -31,16 +40,7 @@
   [text]
   (-> text prepare-nlquery vector parser first treebank/make-tree))
 
-(defn prepare-nlquery
-  "Raw natural language queries must end in a period for some OpenNLP functions"
-  [text]
-  (let [last-char (subs text (dec (count text)))]
-    (if
-        (or
-         (= last-char ".")
-         (= last-char "?")
-         (= last-char "!")) text
-        (str text "."))))
+
 
 ;;; Stanford CoreNLP
 (defonce core-nlp (delay (StanfordLemmatizer.)))
@@ -66,12 +66,13 @@
        (string/join " ")))
 
 (defn lemma-map
-  "Lemmatize a string, returning a word map between the input words and their
+  "TODO: replace tokenization with regex (tokenize fails on conjunctions like it's)
+  Lemmatize a string, returning a word map between the input words and their
   lemmatized form.
   Example: 'It's nice meeting you' -> {'It' 'it', 'nice' 'be', 'meeting' 'nice', 'you' 'meeting'}"
   [^String text]
   (let [^StanfordLemmatizer nlp @core-nlp
-        dumb-tokens (tokenize text)]
+        tokens (tokenize text)]
     (->> text
          lemmatize
          flatten
