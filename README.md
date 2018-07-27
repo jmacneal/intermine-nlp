@@ -29,7 +29,8 @@ Now, you'll be able to use intermine-nlp from any clojure project on your system
 
 
 ## Usage
-The most interesting namespaces for external use are core, nlp, and parse. 
+The most interesting namespaces for external use are core, nlp, and parse. You can read more about those and others [here](src/intermine_nlp/README.md).
+
 To load a model and construct a parser pipeline:
 
 ```
@@ -45,7 +46,5 @@ To load a model and construct a parser pipeline:
 (parser-pipeline "Which genes have names like GOPHER?")
 (parser-pipeline "Show me genes with length greater than 2200")
 ```
-You can read more about those and others [here](src/intermine_nlp/README.md).
-
-
-![alt text](parse_tree.png "Parse of the sentence 'Show me genes with length greater than 2200.")
+And here's a visualization of the parse tree generated for that last query:
+![alt text](parse_tree.png "Parse of the sentence 'Show me genes with length greater than 2200.'")
