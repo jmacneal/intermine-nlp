@@ -1,23 +1,31 @@
 (ns intermine-nlp.nlp
-  (:require [opennlp.nlp :as nlp]
+  (:require [opennlp.nlp :as onlp]
             [opennlp.treebank :as treebank]
             [imcljs.path :as im-path]
             [clojure.pprint :refer [pprint]]
-            [clojure.string :as string])
-  (:import  [lemmatizer StanfordLemmatizer])
-  (:gen-class))
+            [clojure.string :as string]
+            [clojure.java.io :as io])
+  (:import  [lemmatizer StanfordLemmatizer]))
+
 
 ;;; Apache OpenNLP
-(def get-sentences (nlp/make-sentence-detector "resources/nlp_models/en-sent.bin"))
+;; (def en-sent-file (-> "en-sent.bin" clojure.java.io/resource .getFile))
+(def en-sent-file (-> "en-sent.bin" io/resource io/input-stream))
+(def en-token-file (-> "en-token.bin" io/resource io/input-stream))
+(def en-pos-maxent-file (-> "en-pos-maxent.bin" io/resource io/input-stream))
+(def en-chunker-file (-> "en-chunker.bin" io/resource io/input-stream))
+(def en-parser-chunking-file (-> "en-parser-chunking.bin" io/resource io/input-stream))
+
+(def get-sentences (onlp/make-sentence-detector en-sent-file))
 (def tokenize
   "Split a string into words and punctuation marks.
   Example:
          'This is a sentence.' -> '('this' 'is' 'a' 'sentence')"
   (comp (partial remove #(= % "'s"))
-          (nlp/make-tokenizer "resources/nlp_models/en-token.bin")))
-(def pos-tag (nlp/make-pos-tagger "resources/nlp_models/en-pos-maxent.bin"))
-(def chunker (treebank/make-treebank-chunker "resources/nlp_models/en-chunker.bin"))
-(def parser (treebank/make-treebank-parser "resources/nlp_models/en-parser-chunking.bin"))
+          (onlp/make-tokenizer en-token-file)))
+(def pos-tag (onlp/make-pos-tagger en-pos-maxent-file))
+(def chunker (treebank/make-treebank-chunker en-chunker-file))
+(def parser (treebank/make-treebank-parser en-parser-chunking-file))
 
 (defn prepare-nlquery
   "Raw natural language queries must end in a period for some OpenNLP functions"

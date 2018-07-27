@@ -5,8 +5,11 @@
             [imcljs.path :as im-path]
             [clojure.pprint :refer [pprint]]
             [intermine-nlp.nlp :as nlp]
-            [clojure.string :as string])
+            [clojure.string :as string]
+            [clojure.java.io :as io])
   (:gen-class))
+
+(def grammar (-> "grammar.bnf" io/resource io/input-stream slurp))
 
 (defn model-grammar
   "Generate a grammar (parse map) for an intermine model.
@@ -38,14 +41,14 @@
   with a model-specific parser.
   "
   ([model]
-   (let [top-grammar (ebnf (slurp "resources/grammar.bnf"))
+   (let [top-grammar (ebnf grammar)
          bottom-grammar (model-grammar model)]
      (insta/parser (merge top-grammar bottom-grammar)
                    :start :QUERY
                    :auto-whitespace :standard
                    :string-ci true)))
   ([model class-lemma-map]
-   (let [top-grammar (ebnf (slurp "resources/grammar.bnf"))
+   (let [top-grammar (ebnf grammar)
          bottom-grammar (model-grammar model class-lemma-map)]
      (insta/parser (merge top-grammar bottom-grammar)
                    :start :QUERY
