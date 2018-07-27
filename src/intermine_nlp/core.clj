@@ -43,7 +43,19 @@
 
 (defn -main
   "In the future I'll return a query, right now I'll just give you the parse tree."
-  [^String text]
+  [& args]
   (let [fly-model (model/fetch-model "fly")
         pipeline (parser-pipeline fly-model :lemmatize true)]
-    (pprint (pipeline text))))
+    (pprint "Enter a simple query and I'll attempt to parse it!")
+    (pprint "Example: Show me genes with primaryIdentifier like ovo.")
+    (loop []
+      (print "\n")
+      (pprint "To quit, hit <ENTER>")
+      (let [text (read-line)
+            result (pipeline text)]
+        (if (not (empty? text))
+          (do (cond
+                (insta/failure? result) (pprint "Sorry, I couldn't parse that.")
+                :else                   (pprint result))
+              (recur))
+          (pprint "Bye! Happy hacking."))))))
