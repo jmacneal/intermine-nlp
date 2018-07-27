@@ -7,6 +7,13 @@ Intermine is a database generation tool for genetic datasets. This library aims 
 
 InterMine databases are queried using a GraphQL-like query language called PathQuery, formatted in either JSON or XML. A web-based graphical tool for creating queries exists, but is still rather complex and unintuitive to use for those unfamiliar with the system. The maintainers of the InterMine project believe that an interface more similar to natural language would lower the barrier to entry for non-developers. Therefore, I’m proposing to work on adding a natural language to structured query translator, allowing users to more easily interact with their database.
 
+## Current Status
+Most of the work to date has been at the parser level and below, developing a solid technical base
+for the query generation portion of the pipeline. That will depend heavily on fuzzy string comparison logic,
+which is certainly non-trivial. I hope to have a basic workable demo of the full pipeline (from English query
+to PathQuery, possibly even returning database results) by early-mid August 2018.
+
+![alt text](pipeline.png "High-level parser and PathQuery generation pipeline")
 
 ## Requirements
 Make sure you have a working installation of Java (version 8 or later) on your system. Additionally, you'll need [leiningen](https://leiningen.org/),
