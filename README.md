@@ -41,8 +41,9 @@ To load a model and construct a parser pipeline:
 
 ;;; Bad query
 (parser-pipeline "This is a test sentence that does not parse.")
-;;; Good query
+;;; Good queries
 (parser-pipeline "Which genes have names like GOPHER?")
+(parser-pipeline "Show me genes with length greater than 2200")
 ```
 You can read more about those and others [here](src/intermine_nlp/README.md).
 
