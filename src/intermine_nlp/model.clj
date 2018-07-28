@@ -2,7 +2,9 @@
   (:require [imcljs.fetch :as fetch]
             [imcljs.path :as path]
             [clojure.edn :as edn]
-            [clojure.java.io :as io]))
+            [clojure.java.io :as io]
+            [clojure.core.match :refer [match]]
+            [imcljs.fetch :as im-fetch]))
 
 (defn load-local-model
   "Load a local copy of a model EDN file (backup for fetch-model).
@@ -19,32 +21,31 @@
   Options are:
   medic|fly|fly-b|human|yeast|rat|mouse
   Can optionally supply a database service ({:root XXX}) instead."
-  ([database]
-   (cond
-     (string? database)
-     (let [url (case database
-                 "medic"    "medicmine.jcvi.org/medicmine"
-                 "fly"      "www.flymine.org/query"
-                 "human"    "www.humanmine.org/humanmine"
-                 "yeast"    "yeastmine.yeastgenome.org/yeastmine"
-                 "rat"      "ratmine.mcw.edu/ratmine"
-                 "mouse"    "www.mousemine.org/mousemine"
-                 "fly-beta" "beta.flymine.org/beta"
-                 "www.flymine.org/query")
-           db-request {:root url
-                       :token nil
-                       :model "genomic"}]
-       (try
-         (fetch/model db-request)
-         (catch java.lang.Exception e (load-local-model database))))
-
-     (map? database)
-     (let [db-request {:root (:root database)
-                       :token nil
-                       :model "genomic"}]
-       (try
-         (fetch/model db-request)
-         (catch java.lang.Exception e nil))))))
+  [db]
+  (match [db]
+         [{:root root}]
+         (try
+           (im-fetch/templates {:root root})
+           (catch java.lang.Exception e (println "Couldn't access database")))
+         [db-name]
+         (let [url (case db-name
+                     "medic"    "medicmine.jcvi.org/medicmine"
+                     "fly"      "www.flymine.org/query"
+                     "human"    "www.humanmine.org/humanmine"
+                     "yeast"    "yeastmine.yeastgenome.org/yeastmine"
+                     "rat"      "ratmine.mcw.edu/ratmine"
+                     "mouse"    "www.mousemine.org/mousemine"
+                     "fly-beta" "beta.flymine.org/beta"
+                     java.lang.Exception)
+               db-request {:root url
+                           :token nil
+                           :model {:name "genomic"}}]
+           (try
+             (im-fetch/model db-request)
+             (catch java.lang.Exception e
+               (do
+                 (println "Couldn't access database, attempting local read.")
+                 (load-local-model db-name)))))))
 
 
 (defn store-model
