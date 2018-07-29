@@ -30,6 +30,21 @@ design grammar parsing rules.
 
 Key function: `rand-query`
 
+Example:
+```
+(require '[intermine-nlp.model :as model])
+(require '[intermine-nlp.randquery :as randq])
+(require '[clojure.pprint :refer [pprint]])
+(def fly-service {:root "www.flymine.org/query"})
+(def fly-model (model/fetch-model fly-service))
+(def fly-service (assoc fly-service :model fly-model))
+
+(let [query1 (randq/rand-query fly-service 3 0 2) ;;; random-query with 3 views, no summaries, and 2 constraints
+      query2 (randq/rand-query fly-service 0 1 1)] ;;; random-query with 1 summary and 1 constraint
+      (pprint query1)
+      (pprint query2))
+```
+
 # util.clj
 Contains helper functions, mostly for fetching data from an intermine remote database.
 
