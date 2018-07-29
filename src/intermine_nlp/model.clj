@@ -1,10 +1,8 @@
 (ns intermine-nlp.model
-  (:require [imcljs.fetch :as fetch]
-            [imcljs.path :as path]
+  (:require [imcljs.fetch :as im-fetch]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
-            [clojure.core.match :refer [match]]
-            [imcljs.fetch :as im-fetch]))
+            [clojure.core.match :refer [match]]))
 
 (defn load-local-model
   "Load a local copy of a model EDN file (backup for fetch-model).
@@ -25,7 +23,7 @@
   (match [db]
          [{:root root}]
          (try
-           (im-fetch/templates {:root root})
+           (im-fetch/model {:root root})
            (catch java.lang.Exception e (println "Couldn't access database")))
          [db-name]
          (let [url (case db-name
