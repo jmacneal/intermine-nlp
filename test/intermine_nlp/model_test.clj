@@ -14,7 +14,8 @@
   "Setup tests by fetching and locally storing all 7 tested database models."
   [test-fn]
   (println "Fetching models for tests...")
-  (doall (map #(model/store-model (model/fetch-model %) %) (keys model-root-map)))
+  (doall (map #(model/store-model (model/fetch-model % :no-fallback true) %)
+              (keys model-root-map)))
   (test-fn))
 
 (test/use-fixtures :once setup-local-models)

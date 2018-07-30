@@ -18,13 +18,14 @@
   "Fetch a model for the given dataset. Defaults to flymine.
   Options are:
   medic|fly|fly-b|human|yeast|rat|mouse
-  Can optionally supply a database service ({:root XXX}) instead."
-  [db]
+  Can optionally supply a database service ({:root XXX}) instead.
+  Optional keyword argument ':no-fallback true' to prevent falling back to local store."
+  [db & {:as options}]
   (match [db]
          [{:root root}]
          (try
            (im-fetch/model {:root root})
-           (catch java.lang.Exception e (println "Couldn't access database")))
+           (catch java.lang.Exception e (println "Couldn't access remote database")))
          [db-name]
          (let [url (case db-name
                      "medic"    "medicmine.jcvi.org/medicmine"
@@ -41,10 +42,12 @@
            (try
              (im-fetch/model db-request)
              (catch java.lang.Exception e
-               (do
-                 (println "Couldn't access database, attempting local read.")
-                 (load-local-model db-name)))))))
-
+               (if (:no-fallback options)
+                   (println "Couldn't access remote database")
+                   (do
+                     (println "Couldn't access remote database, attempting local read")
+                     (load-local-model db-name)
+                     )))))))
 
 (defn store-model
   "Store a model in the appropriate directory (resources/db_models)."
