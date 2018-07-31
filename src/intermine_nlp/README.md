@@ -15,7 +15,7 @@ NLP toolbox: an interface to tools from the OpenNLP and Stanford CoreNLP project
 only the tokenize and lemmatize functions are being used, although treebank parsring and chunking
 may come into use soon for handling difficult queries.
 
-Key function: `rand-query`
+Key functions: `lemmatize-as-text`, `lemma-map`, `tokenize`
 
 # model.clj
 For fetching model data from a remote intermine database, as well as for loading and storing said
