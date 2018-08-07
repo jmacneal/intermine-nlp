@@ -11,24 +11,38 @@
 
 (def grammar (-> "grammar.bnf" io/resource io/input-stream slurp))
 
+(defn class-lemma-mapping
+  "Given a model, lemmatizes all class names and returns a hash map,
+  mapping lemmatized class names to un-lemmatized ones."
+  [model]
+  (->> model
+       :classes
+       keys
+       (map name)
+       (clojure.string/join " ")
+       nlp/lemma-map))
+
+(defn field-lemma-mapping
+  "Given a model, lemmatizes all field names and returns a hash map,
+  mapping lemmatized fields to un-lemmatized ones."
+  [model]
+  (let [classes (:classes model)
+        class-kws (keys classes)
+        class-paths (map name class-kws)]
+    (apply merge (map #(->> %
+                            (im-path/attributes model)
+                            keys
+                            (map name)
+                            (clojure.string/join " ")
+                            nlp/lemma-map) class-paths))))
+
 (defn model-grammar
   "Generate a grammar (parse map) for an intermine model.
   Consists of 2 productions: one for classes, one for all fields/attributes.
   "
   ([model]
-   (let [classes (:classes model)
-         class-kws (keys classes)
-         class-paths (map name class-kws)
-         class-lemma-map (nlp/lemma-map (string/join " " class-paths))
-         attr-map (map #(hash-map :class % :attrs (im-path/attributes model %)) class-paths)
-         attr-keys (distinct (flatten (map #(->> % :attrs keys)  attr-map)))
-         attrs (map name attr-keys)]
-     (merge
-      {:FIELD (apply alt (map #(string %) attrs))}
-      {:CLASS (apply alt (map #(string %) class-paths))})))
-
-  ([model class-lemma-map]
-   (let [class-paths (keys class-lemma-map)
+   (let [class-lemma-map (class-lemma-mapping model)
+         class-paths (keys class-lemma-map)
          attr-map (map #(hash-map :class % :attrs (im-path/attributes model %)) class-paths)
          attr-keys (distinct (flatten (map #(->> % :attrs keys)  attr-map)))
          attrs (map (comp nlp/lemmatize-as-text name) attr-keys)]
@@ -47,37 +61,63 @@
                    :start :QUERY
                    :auto-whitespace :standard
                    :string-ci true)))
-  ([model class-lemma-map]
-   (let [top-grammar (ebnf grammar)
-         bottom-grammar (model-grammar model class-lemma-map)]
-     (insta/parser (merge top-grammar bottom-grammar)
-                   :start :QUERY
-                   :auto-whitespace :standard
-                   :string-ci true)))
-  ([model top-grammar class-lemma-map]
-   (let [bottom-grammar (model-grammar model class-lemma-map)]
+  ([model top-grammar]
+   (let [bottom-grammar (model-grammar model)]
      (insta/parser (merge top-grammar bottom-grammar)
                    :start :QUERY
                    :auto-whitespace :standard
                    :string-ci true))))
 
+
 ;;; Parse Tree transformations
 (def view-map
-  {:ORGANISM (fn [text] {:from text})
-   :CLASS (fn [text] {:select text})
-   :FIELD (fn [text] {:select text})})
+  {:PATH  (fn [& children] {:PATH (apply merge (remove string? children))})
+   :CLASS (fn [text] {:CLASS text})
+   :FIELD (fn [text] {:FIELD text})
+   :VALUE (fn [text] {:VALUE text})
+   })
+
+(defn transform-view
+  "Transform :VIEW map into a format recognizable by imcljs"
+  [view-tree]
+  (let [tree (insta/transform view-map view-tree)]
+    (->> tree
+         (remove string?)
+         flatten
+         (remove string?))))
 
 (def constraint-map
-  {:CLASS (fn [text] [:from text])
-   :FIELD (fn [text] [:select text])})
+  {:CONSTR (fn [& constr] {:CONSTR (apply merge constr)})
+   :PATH  (fn [& path] {:PATH (apply merge path)})
+   :CLASS (fn [text] {:CLASS text})
+   :FIELD (fn [text] {:FIELD text})
+   :VALUE (fn [text] {:VALUE text})
+   :VALUES (fn [& values] {:VALUES (filter identity (map :VALUE values))})
+   :COMPARE (fn [comparison] {:COMPARE (first (second comparison))})
+   :MULTI_COMPARE (fn [comparison] {:MULTI_COMPARE (first comparison)})
+   :UNARY_OP (fn [op] {:UNARY_OP (first op)})
+   })
 
-(def transform-map
+(defn transform-constraints
+  "Transform :CONSTR map into a format recognizable by imcljs"
+  [constr-tree]
+  (let [tree (insta/transform constraint-map constr-tree)]
+    (->> tree
+         flatten
+         (remove string?)
+         ;; (apply merge)
+         )))
+
+(def top-map
   {:QUERY (fn [& children] (remove string? children))
-  :VIEW (fn [& children] (insta/transform view-map children))
-   :CONSTR (fn [& children] [:CONSTR (remove string? children)])
-   :VALUE (fn [text] [:VALUE text])})
+   :ORGANISM (fn [text] {:ORGANISM text})
+   :VIEW (fn [& children] {:VIEW
+                             (transform-view (remove string? children))})
+   :CONSTRS (fn [& children] {:CONSTRS
+                             (transform-constraints (remove string? children))})
+})
 
 (defn transform-tree
   "Transform a parse tree according "
   [parse-tree]
-  (insta/transform transform-map parse-tree))
+  (apply merge (flatten (insta/transform top-map parse-tree))))
