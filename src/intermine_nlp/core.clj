@@ -6,34 +6,10 @@
             [instaparse.core :as insta]
             [clojure.string :as string]
             [clojure.pprint :refer [pprint]]
-            [clojure.set :refer [map-invert]])
+            [clojure.set :refer [map-invert]]
+            [imcljs.query :as im-query]
+            [intermine-nlp.query :as query])
   (:gen-class))
-
-(defn gen-view
-  "Merge the values in a map of view elements (:CLASS, :FIELD) into an
-  imcljs view map."
-  [view lemma-class-map lemma-field-map]
-  (let [class (get lemma-class-map (:CLASS view))
-        field (get lemma-field-map (:FIELD view))]
-    (if class
-      (str class "." field)
-      field)))
-
-(defn gen-constraint
-  "Merge the values in a map of constraint elements(:CLASS, :FIELD, :VALUE,
-  :COMPARE, :MULTI_COMPARE, :UNARY_OP) into an imcljs constraint map."
-  [constraints lemma-class-map lemma-field-map])
-
-(defn gen-query
-  "Generate a query from a map containing :VIEW :CONSTRS and :ORGANISM keys."
-  [model query-map]
-  (let [lemma-class-map (map-invert (parse/class-lemma-mapping model))
-        lemma-field-map (map-invert (parse/field-lemma-mapping model))
-        views (flatten (map vals (:VIEW query-map)))
-        constraints (flatten (map vals (:CONSTRS query-map)))]
-    {:select (map #(gen-view % lemma-class-map lemma-field-map) views)
-     :where (map #(gen-constraint % lemma-class-map lemma-field-map) constraints)}))
-
 
 (defn parser-pipeline
   "Generate a parser pipeline for a given InterMine model.
@@ -44,7 +20,8 @@
     #(->> %
           nlp/lemmatize-as-text
           parser
-          ;; parse/transform-tree
+          parse/transform-tree
+          (query/gen-query model)
         )))
 
 (defn -main
