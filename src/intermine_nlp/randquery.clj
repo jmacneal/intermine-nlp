@@ -1,6 +1,5 @@
 (ns intermine-nlp.randquery
-  (:require [imcljs.query :as query]
-            [imcljs.path :as im-path]
+  (:require [imcljs.path :as im-path]
             [clojure.pprint :refer [pprint]]
             [clojure.string :as string]
             [intermine-nlp.util :as util]
