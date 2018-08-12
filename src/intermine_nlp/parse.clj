@@ -6,7 +6,8 @@
             [clojure.pprint :refer [pprint]]
             [intermine-nlp.nlp :as nlp]
             [clojure.string :as string]
-            [clojure.java.io :as io])
+            [clojure.java.io :as io]
+            [intermine-nlp.util :as util])
   (:gen-class))
 
 (def grammar (-> "grammar.bnf" io/resource io/input-stream slurp))
@@ -16,9 +17,7 @@
   mapping lemmatized class names to un-lemmatized ones."
   [model]
   (->> model
-       :classes
-       keys
-       (map name)
+       util/class-names
        (clojure.string/join " ")
        nlp/lemma-map))
 
@@ -26,15 +25,10 @@
   "Given a model, lemmatizes all field names and returns a hash map,
   mapping lemmatized fields to un-lemmatized ones."
   [model]
-  (let [classes (:classes model)
-        class-kws (keys classes)
-        class-paths (map name class-kws)]
-    (apply merge (map #(->> %
-                            (im-path/attributes model)
-                            keys
-                            (map name)
-                            (clojure.string/join " ")
-                            nlp/lemma-map) class-paths))))
+  (let [field-paths (util/field-names model)]
+    (->> field-paths
+         (clojure.string/join " ")
+         nlp/lemma-map)))
 
 (defn model-grammar
   "Generate a grammar (parse map) for an intermine model.
