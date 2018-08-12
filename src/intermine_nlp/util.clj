@@ -49,3 +49,20 @@
 
 (def summaries
   (memoize (partial im-fetch/summary-fields)))
+
+(defn class-names
+  "Returns a list of class names (strings) for all classes in a given model."
+  [model]
+  (->> model
+       :classes
+       keys
+       (map name)))
+
+(defn field-names
+  "Returns a list of class names (strings) for all classes in a given model."
+  [model]
+  (let [class-paths (class-names model)]
+    (distinct (flatten (map #(->> %
+                                  (im-path/attributes model)
+                                  keys
+                                  (map name)) class-paths)))))
