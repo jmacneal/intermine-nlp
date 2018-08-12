@@ -4,6 +4,26 @@
             [clojure.set :refer [map-invert]])
   (:gen-class))
 
+(def op-map {
+             :EQ "="
+             :NEQ "!="
+             :GT ">"
+             :LT "<"
+             :GEQ ">="
+             :LEQ "<="
+             :IN "IN"
+             :NIN "NOT IN"
+             :M_ONE_OF "ONE OF"
+             :M_NONE_OF "NONE OF"
+             :M_OVERLAPS "OVERLAPS"
+             :M_NOVERLAPS "DOES NOT OVERLAP"
+             :M_OUTSIDE "OUTSIDE"
+             :M_WITHIN "WITHIN"
+             :M_CONTAINS "CONTAINS"
+             :M_NCONTAINS "DOES NOT CONTAIN"
+             :NULL "IS NULL"
+             :NNULL "IS NOT NULL"})
+
 (defn gen-path
   "Merge the values in a map of view elements (:CLASS, :FIELD) into an
   imcljs view map."
@@ -20,9 +40,9 @@
   :COMPARE, :MULTI_COMPARE, :UNARY_OP) into an imcljs constraint map."
   [constraint lemma-class-map lemma-field-map]
   (let [path (gen-path (:PATH constraint) lemma-class-map lemma-field-map)
-        compare (:COMPARE constraint)
-        multi-compare (:MULTI_COMPARE constraint)
-        unary-op (:UNARY_OP constraint)
+        compare (get op-map (:COMPARE constraint))
+        multi-compare (get op-map (:MULTI_COMPARE constraint))
+        unary-op (get op-map (:UNARY_OP constraint))
         value (:VALUE constraint)
         values (:VALUES constraint)]
     (cond
