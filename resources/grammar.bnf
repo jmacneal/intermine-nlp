@@ -7,6 +7,7 @@ QUERY =
   | VIEW 'have' CONSTRS
   | VIEW 'are' CONSTRS
   | VIEW 'is' CONSTRS
+  | VIEW 'be' CONSTRS
   | VIEW 'have' CONSTRS
   | VIEW CONSTRS
   | ORGANISM ',' VIEW
@@ -97,6 +98,7 @@ LIKE =
 NLIKE =
   "not" LIKE
   | "isn't" LIKE
+  | "be not" LIKE
 
 MATH_COMP =
   EQ
@@ -154,7 +156,6 @@ LEQ =
   LT 'or' EQ
   | '<='
 
-
 LIST_COMP =
   "%NOT IMPLEMENTED"
 
@@ -178,6 +179,7 @@ M_ONE_OF =
 M_NONE_OF =
   "not" M_ONE_OF
   | "isn't" M_ONE_OF
+  | "be not" M_ONE_OF
   | "neither"
 
 M_OVERLAPS =
@@ -187,6 +189,7 @@ M_OVERLAPS =
 M_NOVERLAPS =
   "not" M_OVERLAPS
   | "isn't" M_OVERLAPS
+  | "be not" M_OVERLAPS
 
 M_OUTSIDE =
   "%NOT IMPLEMENTED"
@@ -209,10 +212,10 @@ NULL =
   | "empty"
 
 NNULL =
-  "not null"
-  | "isn't null"
-  | "not empty"
-  | "isn't empty"
+  "not" NULL
+  | "isn't" NULL
+  | "be not" NULL
+  | "is not" NULL
 
 SORT =
   SORT SORT
