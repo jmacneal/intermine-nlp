@@ -34,6 +34,8 @@ QUERY =
   | "the" QUERY
   | QUERY 'in' ORGANISM
   | ORGANISM QUERY
+  | 'from' ORGANISM 'select' QUERY
+  | 'from' ORGANISM QUERY
   | QUERY 'sort' SORT
   | QUERY 'sort by' SORT
   | QUERY "?"
