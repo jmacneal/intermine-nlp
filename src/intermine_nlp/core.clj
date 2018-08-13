@@ -15,14 +15,15 @@
   "Generate a parser pipeline for a given InterMine model.
   options:
   "
-  [model & {:as options}]
-  (let [parser (parse/gen-parser model)]
+  [service & {:as options}]
+  (let [model (:model service)
+        parser (parse/gen-parser model)]
     #(->> %
           nlp/lemmatize-as-text
           parser
           parse/transform-tree
-          (query/gen-query model)
-        )))
+          (query/gen-query service)
+          )))
 
 (defn -main
   "In the future I'll return a query, right now I'll just give you the parse tree."

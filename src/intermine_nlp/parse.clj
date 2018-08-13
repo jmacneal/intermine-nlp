@@ -16,10 +16,10 @@
   "Given a model, lemmatizes all class names and returns a hash map,
   mapping lemmatized class names to un-lemmatized ones."
   [model]
-  (->> model
-       util/class-names
-       (clojure.string/join " ")
-       nlp/lemma-map))
+  (let [class-paths (util/class-names model)]
+    (->> class-paths
+         (clojure.string/join " ")
+         nlp/lemma-map)))
 
 (defn field-lemma-mapping
   "Given a model, lemmatizes all field names and returns a hash map,
@@ -49,12 +49,8 @@
   with a model-specific parser.
   "
   ([model]
-   (let [top-grammar (ebnf grammar)
-         bottom-grammar (model-grammar model)]
-     (insta/parser (merge top-grammar bottom-grammar)
-                   :start :QUERY
-                   :auto-whitespace :standard
-                   :string-ci true)))
+   (let [top-grammar (ebnf grammar)]
+     (gen-parser model top-grammar)))
   ([model top-grammar]
    (let [bottom-grammar (model-grammar model)]
      (insta/parser (merge top-grammar bottom-grammar)
