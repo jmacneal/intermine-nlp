@@ -47,8 +47,16 @@
   of possible-values and unique-values are broken"
   (memoize possible-values-))
 
-(def summaries
+(def fetch-summaries
+  "Fetch summary fields for all classes in a database.
+  Argument: service"
   (memoize (partial im-fetch/summary-fields)))
+
+(defn class-summary
+  "Fetches the summary for a given class from a given db service"
+  [service class-name]
+  (let [summaries (fetch-summaries service)]
+    (get summaries (keyword class-name))))
 
 (defn class-names
   "Returns a list of class names (strings) for all classes in a given model."
@@ -56,7 +64,8 @@
   (->> model
        :classes
        keys
-       (map name)))
+       (map name)
+       distinct))
 
 (defn field-names
   "Returns a list of class names (strings) for all classes in a given model."
