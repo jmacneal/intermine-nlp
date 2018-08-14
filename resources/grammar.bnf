@@ -223,7 +223,7 @@ NNULL =
   | "is not" NULL
 
 SORT =
-  SORT SORT
+  SORT SORT+
   | VALUE 'descend'
   | VALUE 'ascend'
 
