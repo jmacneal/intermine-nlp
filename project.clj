@@ -23,9 +23,9 @@
                  [instaparse "1.4.9"]
                  [rhizome "0.2.9"]
                  [clj-fuzzy "0.4.1"]
+                 [org.clojure/math.combinatorics "0.1.4"]
                  ]
-  ;; :main ^:skip-aot intermine-nlp.core
   :main intermine-nlp.core
-  ;; :main ^:skip-aot intermine-nlp.nlp
+  ;; :main ^:skip-aot intermine-nlp.core
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all}})
