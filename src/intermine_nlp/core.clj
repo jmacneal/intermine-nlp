@@ -8,7 +8,8 @@
             [clojure.pprint :refer [pprint]]
             [clojure.set :refer [map-invert]]
             [imcljs.query :as im-query]
-            [intermine-nlp.query :as query])
+            [intermine-nlp.query :as query]
+            [intermine-nlp.fuzzy :as fuzzy])
   (:gen-class))
 
 (defn parser-pipeline
@@ -17,19 +18,23 @@
   "
   [service & {:as options}]
   (let [model (:model service)
-        parser (parse/gen-parser model)]
+        parser (parse/gen-parser model)
+        threshold (or (:threshold options) 0.8)]
     #(->> %
           nlp/lemmatize-as-text
-          parser
+          (fuzzy/replace-class-names model threshold)
+          (fuzzy/replace-field-names model threshold)
+          nlp/lemmatize-as-text
+          (insta/parse parser)
           parse/transform-tree
           (query/gen-query service)
           )))
 
 (defn -main
-  "In the future I'll return a query, right now I'll just give you the parse tree."
+  "I'll try to parse your English query and give you the PathQuery translation."
   [& args]
   (let [fly-model (model/fetch-model "fly")
-        pipeline (parser-pipeline fly-model :lemmatize true)]
+        pipeline (parser-pipeline fly-model)]
     (pprint "Enter a simple query and I'll attempt to parse it!")
     (pprint "Example: Show me genes with primaryIdentifier like ovo.")
     (loop []
@@ -39,7 +44,7 @@
             result (pipeline text)]
         (if (not (empty? text))
           (do (cond
-                (insta/failure? result) (pprint "Sorry, I couldn't parse that.")
+                (every? empty? result) (pprint "Sorry, I couldn't parse that.")
                 :else                   (pprint result))
               (recur))
           (pprint "Bye! Happy hacking."))))))

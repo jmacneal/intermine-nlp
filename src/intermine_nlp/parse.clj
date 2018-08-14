@@ -7,7 +7,8 @@
             [intermine-nlp.nlp :as nlp]
             [clojure.string :as string]
             [clojure.java.io :as io]
-            [intermine-nlp.util :as util])
+            [intermine-nlp.util :as util]
+            [intermine-nlp.fuzzy :as fuzzy])
   (:gen-class))
 
 (def grammar (-> "grammar.bnf" io/resource io/input-stream slurp))
@@ -102,10 +103,12 @@
   {:QUERY (fn [& children] (remove string? children))
    :ORGANISM (fn [text] {:ORGANISM text})
    :VIEW (fn [& children] {:VIEW
-                             (transform-view (remove string? children))})
+                          (vec (transform-view (remove string? children)))})
    :CONSTRS (fn [& children] {:CONSTRS
-                             (transform-constraints (remove string? children))})
-})
+                             (vec (transform-constraints (remove string? children)))})
+   ;; :SORT (fn [& children] {:SORT
+   ;;                        (vec (transform-sort (remove string? children)))})
+   })
 
 (defn transform-tree
   "Transform a parse tree according "
