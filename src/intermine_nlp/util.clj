@@ -58,6 +58,12 @@
   (let [summaries (fetch-summaries service)]
     (get summaries (keyword class-name))))
 
+(defn un-lemmatize
+  "Convert a lemmatized  path back to its schema form. If no match (or if
+  the path is already in schema form), return the original path."
+  [path lemma-path-map]
+  (or (get lemma-path-map path) path))
+
 (defn class-names
   "Returns a list of class names (strings) for all classes in a given model."
   [model]
