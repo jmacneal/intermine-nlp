@@ -14,6 +14,6 @@
     (testing "Testing gen-query method"
       (are [tree generated-query] (= generated-query (query/gen-query service tree))
         tree1 {:from "Gene", :select ["Gene.secondaryIdentifier" "Gene.symbol" "Gene.primaryIdentifier" "Gene.organism.name"], :where [{:path "chromosome.length", :op "<", :value "10000"}]}
-        tree2 {:from "Chromosome", :select ["Chromosome.primaryIdentifier" "Chromosome.organism.name" "Chromosome.length"], :where [{:path "Chromosome.identifier", :op "=", :value "foo"}]}
+        tree2 {:from "Chromosome", :select ["Chromosome.primaryIdentifier" "Chromosome.organism.name" "Chromosome.length"], :where [{:path "Chromosome.primaryIdentifier", :op "=", :value "foo"}]}
         tree3 {:from "Protein", :select ["Protein.primaryIdentifier" "Protein.primaryAccession" "Protein.organism.name"], :where [{:path "Protein.length", :op "<", :value "50000"}]}
         ))))
