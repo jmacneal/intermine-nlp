@@ -20,6 +20,7 @@ QUERY =
   | 'show' QUERY
   | 'show me' QUERY
   | 'show I' QUERY
+  | 'show i' QUERY
   | 'show all' QUERY
   | 'show the' QUERY
   | 'which' QUERY
@@ -31,6 +32,7 @@ QUERY =
   | 'list all' QUERY
   | 'what is' QUERY
   | 'I want to see' QUERY
+  | 'i want to see' QUERY
   | "the" QUERY
   | QUERY 'in' ORGANISM
   | ORGANISM QUERY
@@ -54,6 +56,7 @@ PATH =
   | FIELD
   | FIELD 'of' CLASS
   | CLASS 'with' FIELD
+  | (CLASS '.')+ FIELD
 
 
 CONSTRS =
