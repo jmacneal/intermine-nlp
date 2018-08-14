@@ -68,10 +68,16 @@
        distinct))
 
 (defn field-names
-  "Returns a list of class names (strings) for all classes in a given model."
-  [model]
-  (let [class-paths (class-names model)]
-    (distinct (flatten (map #(->> %
-                                  (im-path/attributes model)
-                                  keys
-                                  (map name)) class-paths)))))
+  "Returns a list of field names (strings) for all classes in a given model.
+  If class provided, returns list of fields for given class in model."
+  ([model]
+   (let [class-paths (class-names model)]
+     (distinct (flatten (map #(->> %
+                                   (im-path/attributes model)
+                                   keys
+                                   (map name)) class-paths)))))
+  ([model class]
+   (distinct (flatten (->> class
+                           (im-path/attributes model)
+                           keys
+                           (map name))))))
