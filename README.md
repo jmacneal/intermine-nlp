@@ -84,8 +84,9 @@ to run all tests in the current test namespace.
 
 
 ## Future Work
-Ranked in ascending order of difficulty
+Ranked in ascending order of difficulty (and by urgency in descending order, approximately):
 
+* Improve test coverage of existing codebase
 * Parse sorting ("..., sort by length ascending.")
 * Multi-word fuzzy matching of raw input, such as "primary IDs"->"primaryIdentifier" (consider clojure.math.combinatorics)
 * Further improvement of grammar (resources/grammar.bnf) and query/parse functionality, manually covering more constructions and schema-dependant special cases
