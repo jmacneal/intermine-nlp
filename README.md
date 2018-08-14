@@ -1,5 +1,5 @@
 # intermine-nlp
-Welcome to the intermine-nlp wiki!
+Welcome to intermine-nlp!
 
 intermine-nlp is a library for generating InterMine PathQuery queries (JSON or XML) from natural language queries. There are many queries which are difficult or impossible to word in English, let alone translate into a PathQuery. For this project, it’s only worth targeting relatively simple query structures which users of the natural language interface are likely to care about.
 
