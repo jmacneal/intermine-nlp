@@ -1,4 +1,4 @@
-(defproject intermine-nlp "0.1.0-SNAPSHOT"
+(defproject intermine-nlp "0.1.1-SNAPSHOT"
   :description "intermine-nlp provides translation from natural (English) language to PathQuery queries."
   :url "http://example.com/FIXME"
   :license {:name "Gnu Lesser General Public License Version 2.1"
