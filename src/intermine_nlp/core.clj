@@ -34,7 +34,8 @@
   "I'll try to parse your English query and give you the PathQuery translation."
   [& args]
   (let [fly-model (model/fetch-model "fly")
-        pipeline (parser-pipeline fly-model)]
+        fly-service {:root "www.flymine.org/query" :model fly-model}
+        pipeline (parser-pipeline fly-service)]
     (pprint "Enter a simple query and I'll attempt to parse it!")
     (pprint "Example: Show me genes with primaryIdentifier like ovo.")
     (loop []
