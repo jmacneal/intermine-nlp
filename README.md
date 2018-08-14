@@ -9,6 +9,9 @@ InterMine databases are queried using a GraphQL-like query language called PathQ
 
 For further information, refer to my (first) [article](https://medium.com/@jakemacneal/intermine-nlp-nlp-query-answering-for-intermine-e8dfdfb64b9) on medium.
 
+I (Jake) had the opportunity to work on this project as a recipient of a Google Summer of Code (2018) stipend.
+Coming soon: recap article for my Google Summer of Code, along with a small live demo.
+
 
 ## Current Status
 Most of the work to date has been at the parser level and below, developing a solid technical base
