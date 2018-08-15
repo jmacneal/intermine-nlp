@@ -14,12 +14,16 @@
 
 (defn parser-pipeline
   "Generate a parser pipeline for a given InterMine model.
+  service should be of the format {:root \"url-of-db-query-service\"}.
   options:
   "
   [service & {:as options}]
-  (let [model (:model service)
+  (let [model (try (model/fetch-model service)
+                   (catch Exception e (model/fetch-model (assoc service :model {:name "genomic"}))))
+        service (assoc service :model model)
         parser (parse/gen-parser model)
         threshold (or (:threshold options) 0.8)]
+    (pprint (keys service))
     #(->> %
           nlp/lemmatize-as-text
           (fuzzy/replace-class-names model threshold)
