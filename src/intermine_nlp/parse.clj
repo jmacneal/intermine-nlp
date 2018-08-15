@@ -1,7 +1,7 @@
 (ns intermine-nlp.parse
   (:require [clojure.core.match :refer [match]]
             [instaparse.core :as insta]
-            [instaparse.combinators :refer :all]
+            [instaparse.combinators :refer [string alt ebnf]]
             [imcljs.path :as im-path]
             [clojure.pprint :refer [pprint]]
             [intermine-nlp.nlp :as nlp]
