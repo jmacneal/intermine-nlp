@@ -69,3 +69,13 @@
   ([model class threshold text]
    (let [field-names (util/field-names model class)]
      (replace-fuzzy text field-names threshold))))
+
+
+(defn replace-model-names
+  "Using fuzzy logic, replace all words in text with the best-matching class
+  or field name, if confidence threshold is exceeded."
+  [model threshold text]
+  (let [class-names (util/class-names model)
+        field-names (util/field-names model)
+        model-names (clojure.set/union class-names field-names)]
+    (replace-fuzzy text model-names threshold)))

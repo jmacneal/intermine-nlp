@@ -15,6 +15,11 @@
 (def default-service {:root "www.flymine.org/query" :model {:name "genomic"}})
 (def default-model (model/fetch-model default-service))
 
+(defn debug-print
+  "Print some text with a label, for use with doto and threading macros."
+  ([text tag]
+   (println (str (format "%-16s" tag) text))))
+
 (defn parser-pipeline
   "Generate a parser pipeline for a given InterMine model.
   service should be of the format {:root \"url-of-db-query-service\"}.
@@ -29,25 +34,19 @@
     (cond
       (:debug options)
       #(as-> % $
+         (fuzzy/replace-model-names model threshold $)
+         (doto $ (debug-print "Fuzzy Matched: "))
          (nlp/lemmatize-as-text $)
-         (doto $ println)
-         (fuzzy/replace-class-names model threshold $)
-         (doto $ println)
-         (fuzzy/replace-field-names model threshold $)
-         (doto $ println)
-         (nlp/lemmatize-as-text $)
-         (doto $ println)
+         (doto $ (debug-print "Lemmatized: "))
          (insta/parse parser $)
          (doto $ insta/visualize)
          (parse/transform-tree $)
-         (doto $ println)
+         (doto $ (debug-print "Transformed Tree: "))
          (query/gen-query service $)
          )
       :else
       #(->> %
-         nlp/lemmatize-as-text
-         (fuzzy/replace-class-names model threshold)
-         (fuzzy/replace-field-names model threshold)
+            (fuzzy/replace-model-names model threshold $)
          nlp/lemmatize-as-text
          (insta/parse parser)
          parse/transform-tree
