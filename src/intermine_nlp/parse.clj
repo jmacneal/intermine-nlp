@@ -62,7 +62,9 @@
 
 ;;; Parse Tree transformations
 (def view-map
-  {:PATH  (fn [& children] {:PATH (apply merge (remove string? children))})
+  {:PATH  (fn [& children] {:PATH
+                           (apply merge
+                                  (remove string? children))})
    :CLASS (fn [text] {:CLASS text})
    :FIELD (fn [text] {:FIELD text})
    :VALUE (fn [text] {:VALUE text})

@@ -12,10 +12,13 @@
             [intermine-nlp.fuzzy :as fuzzy])
   (:gen-class))
 
+(def default-service {:root "www.flymine.org/query" :model {:name "genomic"}})
+(def default-model (model/fetch-model default-service))
+
 (defn parser-pipeline
   "Generate a parser pipeline for a given InterMine model.
   service should be of the format {:root \"url-of-db-query-service\"}.
-  options:
+  options: :debug (prints / visualizes at each step)
   "
   [service & {:as options}]
   (let [model (try (model/fetch-model service)
@@ -23,16 +26,33 @@
         service (assoc service :model model)
         parser (parse/gen-parser model)
         threshold (or (:threshold options) 0.8)]
-    (pprint (keys service))
-    #(->> %
-          nlp/lemmatize-as-text
-          (fuzzy/replace-class-names model threshold)
-          (fuzzy/replace-field-names model threshold)
-          nlp/lemmatize-as-text
-          (insta/parse parser)
-          parse/transform-tree
-          (query/gen-query service)
-          )))
+    (cond
+      (:debug options)
+      #(as-> % $
+         (nlp/lemmatize-as-text $)
+         (doto $ println)
+         (fuzzy/replace-class-names model threshold $)
+         (doto $ println)
+         (fuzzy/replace-field-names model threshold $)
+         (doto $ println)
+         (nlp/lemmatize-as-text $)
+         (doto $ println)
+         (insta/parse parser $)
+         (doto $ insta/visualize)
+         (parse/transform-tree $)
+         (doto $ println)
+         (query/gen-query service $)
+         )
+      :else
+      #(->> %
+         nlp/lemmatize-as-text
+         (fuzzy/replace-class-names model threshold)
+         (fuzzy/replace-field-names model threshold)
+         nlp/lemmatize-as-text
+         (insta/parse parser)
+         parse/transform-tree
+         (query/gen-query service)
+         ))))
 
 (defn -main
   "I'll try to parse your English query and give you the PathQuery translation."
@@ -52,4 +72,4 @@
                 (every? empty? result) (pprint "Sorry, I couldn't parse that.")
                 :else                   (pprint result))
               (recur))
-          (pprint "Bye! Happy hacking."))))))
+          (pprint "Bye, and happy hacking."))))))

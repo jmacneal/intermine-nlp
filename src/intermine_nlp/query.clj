@@ -40,7 +40,7 @@
   [view lemma-class-map]
   (let [classes (distinct (flatten (map #(get-in % [:PATH :CLASS]) view)))
         class-paths (distinct (map #(util/un-lemmatize % lemma-class-map) classes))]
-    (first class-paths)))
+    (some identity class-paths)))
 
 (defn gen-path
   "Merge the values in a map of view elements (:CLASS, :FIELD) into an
