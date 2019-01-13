@@ -113,6 +113,7 @@
    })
 
 (defn transform-tree
-  "Transform a parse tree according "
+  "Transform a parse tree according to 'top-map' specification."
   [parse-tree]
   (apply merge (flatten (insta/transform top-map parse-tree))))
+

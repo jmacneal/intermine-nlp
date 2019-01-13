@@ -42,11 +42,11 @@
          (doto $ insta/visualize)
          (parse/transform-tree $)
          (doto $ (debug-print "Transformed Tree: "))
-         (query/gen-query service $)
+         (query/gen-query service $) 
          )
       :else
       #(->> %
-            (fuzzy/replace-model-names model threshold $)
+            (fuzzy/replace-model-names model threshold)
          nlp/lemmatize-as-text
          (insta/parse parser)
          parse/transform-tree
@@ -68,7 +68,7 @@
             result (pipeline text)]
         (if (not (empty? text))
           (do (cond
-                (every? empty? result) (pprint "Sorry, I couldn't parse that.")
+                (every? nil? (vals result)) (pprint "Sorry, I couldn't parse that.")
                 :else                   (pprint result))
               (recur))
           (pprint "Bye, and happy hacking."))))))
