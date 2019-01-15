@@ -41,13 +41,15 @@
          -> 'a class.path'"
   [text dictionary threshold]
   (try
-    (let [match-pred (best-match-pred dictionary threshold)]
+    (let [match-pred (best-match-pred dictionary threshold)
+          final-period (when (= \. (last text)) \.)]
       (as-> text $
            (string/split $ #" ")
            (map #(string/split % #"\.") $)
            (map #(map match-pred %) $)
            (map #(string/join "." %) $)
            (string/join " " $)
+           (str $ final-period)
            )
       )
     (catch Exception e nil)))
