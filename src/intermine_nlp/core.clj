@@ -53,7 +53,7 @@
          (query/gen-query service)
          ))))
 
-(defn -main
+ (defn -main
   "I'll try to parse your English query and give you the PathQuery translation."
   [& args]
   (let [fly-model (model/fetch-model "fly")

@@ -5,10 +5,13 @@ QUERY =
   | VIEW <'in which'> CONSTRS
   | VIEW <'for which'> CONSTRS
   | VIEW <'have'> CONSTRS
+  | VIEW <'that have'> CONSTRS
   | VIEW <'are'> CONSTRS
+  | VIEW <'that are'> CONSTRS
   | VIEW <'is'> CONSTRS
+  | VIEW <'that is'> CONSTRS
   | VIEW <'be'> CONSTRS
-  | VIEW <'have'> CONSTRS
+  | VIEW <'that be'> CONSTRS
   | VIEW CONSTRS
   | ORGANISM <','> VIEW
   | ORGANISM <','> VIEW CONSTRS
@@ -20,19 +23,18 @@ QUERY =
   | <'show'> QUERY
   | <'show me'> QUERY
   | <'show I'> QUERY
-  | <'show i'> QUERY
-  | <'show all'> QUERY
   | <'show the'> QUERY
   | <'which'> QUERY
+  | <'find'> QUERY
   | <'all'> QUERY
-  | <'all the'> QUERY
   | <'all of the'> QUERY
   | <'for'> QUERY
   | <'list'> QUERY
   | <'list all'> QUERY
+  | <'what'> QUERY
   | <'what is'> QUERY
+  | <'what are'> QUERY
   | <'I want to see'> QUERY
-  | <'i want to see'> QUERY
   | <'the'> QUERY
   | QUERY <'in'> ORGANISM
   | ORGANISM QUERY
@@ -40,9 +42,9 @@ QUERY =
   | <'from'> ORGANISM QUERY
   | QUERY <'sort'> SORT
   | QUERY <'sort by'> SORT
-  | QUERY "?"
-  | QUERY "."
-  | QUERY "!"
+  | QUERY <'?'>
+  | QUERY <'.'>
+  | QUERY <'!'>
 
 
 VIEW =
@@ -229,9 +231,10 @@ SORT =
 VALUES =
   VALUE (("or"|"and"|",") VALUE)+
 
-
 VALUE =
   #"[0-9a-zA-Z]+"
+  | (<"`">|<"'">) #"[^'`]+" (<"`">|<"'">)
+
 
 ORGANISM =
   'fly'

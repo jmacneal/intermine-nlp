@@ -84,7 +84,7 @@
    :PATH  (fn [& path] {:PATH (apply merge path)})
    :CLASS (fn [text] {:CLASS text})
    :FIELD (fn [text] {:FIELD text})
-   :VALUE (fn [text] {:VALUE text})
+   :VALUE (fn [text] {:VALUE (string/trim text)})
    :VALUES (fn [& values] {:VALUES (filter identity (map :VALUE values))})
    :COMPARE (fn [comparison] {:COMPARE (first (second comparison))})
    :MULTI_COMPARE (fn [comparison] {:MULTI_COMPARE (first comparison)})
